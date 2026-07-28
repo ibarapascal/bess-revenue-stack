@@ -1,0 +1,67 @@
+{
+  "window": [
+    "2025-01-01",
+    "2025-03-31"
+  ],
+  "battery": "50 MW / 100 MWh (2 h)",
+  "foresight": "perfect (upper bound)",
+  "c_deg": {
+    "arbitrage": 17.65,
+    "frequency": 9.54
+  },
+  "finding": "omitting the SOC-headroom constraint overstates net revenue by 2.0-11.2% across the reserve-price sweep, by selling reserve the battery could not have delivered",
+  "table": [
+    {
+      "fr_price_GBP_per_MW_h": 2.0,
+      "net_with_headroom": 444043,
+      "net_without_headroom": 487391,
+      "overstatement_pct": 9.8,
+      "fr_share_of_net_pct_with": 27.0,
+      "mean_reserve_MW_with": 27.71,
+      "mean_reserve_MW_without": 40.73,
+      "efc_with": 352.8,
+      "efc_without": 384.9,
+      "GBP_per_MW_yr_with": 36008,
+      "GBP_per_MW_yr_without": 39524
+    },
+    {
+      "fr_price_GBP_per_MW_h": 5.0,
+      "net_with_headroom": 680139,
+      "net_without_headroom": 756179,
+      "overstatement_pct": 11.2,
+      "fr_share_of_net_pct_with": 65.6,
+      "mean_reserve_MW_with": 41.3,
+      "mean_reserve_MW_without": 42.19,
+      "efc_with": 222.2,
+      "efc_without": 324.6,
+      "GBP_per_MW_yr_with": 55154,
+      "GBP_per_MW_yr_without": 61320
+    },
+    {
+      "fr_price_GBP_per_MW_h": 10.0,
+      "net_with_headroom": 1154515,
+      "net_without_headroom": 1225276,
+      "overstatement_pct": 6.1,
+      "fr_share_of_net_pct_with": 86.0,
+      "mean_reserve_MW_with": 45.97,
+      "mean_reserve_MW_without": 44.68,
+      "efc_with": 130.9,
+      "efc_without": 221.0,
+      "GBP_per_MW_yr_with": 93622,
+      "GBP_per_MW_yr_without": 99360
+    },
+    {
+      "fr_price_GBP_per_MW_h": 20.0,
+      "net_with_headroom": 2181101,
+      "net_without_headroom": 2225094,
+      "overstatement_pct": 2.0,
+      "fr_share_of_net_pct_with": 95.8,
+      "mean_reserve_MW_with": 48.35,
+      "mean_reserve_MW_without": 47.48,
+      "efc_with": 62.2,
+      "efc_without": 104.9,
+      "GBP_per_MW_yr_with": 176871,
+      "GBP_per_MW_yr_without": 180438
+    }
+  ]
+}

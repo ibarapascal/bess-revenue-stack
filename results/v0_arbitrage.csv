@@ -1,0 +1,5 @@
+scenario,c_deg,gross_energy_GBP,deg_cost_GBP,net_GBP,efc_per_year,GBP_per_MW_year
+no degradation cost,0.0,629023,0,629023,683.4,51009
+1.4%/yr field-anchored,12.35,604391,149385,455006,490.3,36897
+2.0%/yr field-anchored,17.65,577398,181134,396264,416.1,32134
+3.0%/yr field-anchored,26.47,527535,210680,316854,322.7,25694
