@@ -1,47 +1,52 @@
 # BESS revenue stack — what four common modelling shortcuts cost, measured on GB market data
 
-Grid-scale battery revenue models are easy to write and easy to get wrong in ways
-that do not announce themselves. The model still solves. The dispatch schedule
-still looks reasonable. The revenue number is simply too high, and nothing in the
-output says so.
+Grid-scale battery revenue models are easy to write and easy to get wrong in ways that do
+not announce themselves: the model still solves, the schedule still looks reasonable, and
+the revenue number is simply too high. This measures how much too high, one shortcut at a
+time, on real GB market data — a 50 MW / 100 MWh battery on Elexon half-hourly prices,
+March 2024 to January 2026, every finding on the same asset and the same window.
 
-This project measures how much too high, one modelling shortcut at a time, on real
-GB market data with a battery degradation cost anchored to observed field data.
-The backtester exists to produce those numbers; the numbers are the point.
+## The five results
 
-It is a controlled experiment on one asset in one market, not a survey of the
-literature: the shortcuts are shown to be *costly* here, and shown to be *common* by
-citation (see How this relates to published work, which also names the published paper
-that makes the same overall argument).
+| # | shortcut | what it costs | the catch |
+|---|---|---|---|
+| 1 | pricing wear at zero | overstates net revenue **79–134 %**, and implies 729 full cycles a year against 243 | the wear price itself is a four-input calculation, only one of which is measured |
+| 2 | no state-of-charge headroom for reserve | overstates **2–13 %** — at £2/MW/h it commits 44.3 MW of reserve against 25.0 MW it could deliver | reserve prices here are a synthetic sweep, not market data |
+| 3 | assuming you can forecast | a real forecast captures **53 % of gross margin but only 21 % of net** | wear is charged on every cycle, right or wrong, so it amplifies forecast error instead of scaling with it |
+| 4 | one flat round-trip efficiency | **the two errors inside it have opposite signs** — with no thermal load the flat assumption is 0.4 % *low*, and all the overstatement (to 15.5 %) is the auxiliary load nobody models | holds for a 2-hour asset discharging at 86 % of rated; a longer-duration asset may well flip it |
+| 5 | one wear price for every service | decides **whether the battery enters the reserve market at all** — 0.00 MW under one price, 25.0 MW when reserve duty is priced at its measured 1.85× lower ageing | the flip sits between ageing ratios of 1.5 and 1.85, and the supporting studies straddle that |
+
+Findings 1, 2, 4 and 5 compare two arms under perfect foresight, which is an unreachable
+upper bound used because both arms share it. Finding 3 is the one that measures what
+losing it costs.
 
 ![waterfall](figures/waterfall.png)
 
-Of £3.15m of perfect-foresight gross margin over the 22 months to January 2026 for a
-50 MW / 100 MWh battery, forecast error removes £1.49m and degradation cost removes a
-further £1.28m, leaving £0.38m.
+Stacked together on the forecast-driven case: of £3.15m of perfect-foresight gross margin,
+forecast error removes £1.49m and degradation cost removes a further £1.28m, leaving
+£0.38m.
 
-Two qualifications belong next to that number rather than deeper in the page. It
-describes a **wholesale-only strategy indexed to the half-hourly reference price**: a
-real GB battery also trades the day-ahead auction, where the clearing price is known at
-gate closure and forecast error costs far less, so £0.38m is the achievable revenue of
-the forecast-dependent leg, not of the asset. And the size of the gap is set by how wear
-is priced — **8.3× at £30.6/MWh and 4.1× at the £20.3/MWh implied by the EPRI field loss
-rate**, which is the honest headline: a factor of four to eight, with the degradation
-price as the dominant input. The top bar is itself the gross margin of a schedule that
-already prices degradation; a model ignoring wear entirely would cycle 729 times a year
-instead of 243 and print £4.17m.
+Two qualifications belong next to that number rather than deeper in the page. It describes
+a **wholesale-only strategy indexed to the half-hourly reference price** — a real GB
+battery also trades the day-ahead auction, where the clearing price is known at gate
+closure and forecast error costs far less, so £0.38m is the achievable revenue of the
+forecast-dependent leg, not of the asset. And the size of the gap is set by how wear is
+priced: **8.3× at £30.6/MWh, 4.1× at the £20.3/MWh implied by the EPRI field loss rate**.
+A factor of four to eight, with the degradation price as the dominant input, is the honest
+headline. The top bar is itself the gross margin of a schedule that already prices
+degradation; a model ignoring wear entirely would cycle 729 times a year and print £4.17m.
 
-## Findings so far
+This is a controlled experiment on one asset in one market, not a survey. The shortcuts
+are shown to be *costly* here and shown to be *common* by citation — see How this relates
+to published work, which also names the published paper that makes the same overall
+argument and reaches the opposite conclusion on finding 4.
 
-All findings below use the same asset and the same window: a 50 MW / 100 MWh battery on
-GB wholesale prices (Elexon MID/APXMIDP), March 2024 to January 2026. Running them on one
-window is deliberate — shorter windows in this dataset have wider spreads, so picking a
-quarter per finding would let each effect be reported at its most flattering.
+## The five results in detail
 
-Findings 1, 2, 4 and 5 run on perfect foresight. That is a theoretical upper bound and
-never achievable; it is used because those are *relative* comparisons in which both arms
-share the same advantage. Finding 3 is the one that measures what dropping the advantage
-costs.
+Running every finding on one window is deliberate: shorter windows in this dataset have
+wider spreads, so choosing a quarter per finding would let each effect be reported at its
+most flattering. Doing the opposite turned out to strengthen the results rather than
+soften them.
 
 **1. Ignoring degradation cost overstates arbitrage revenue by 79–134 % and implies
 cycling no owner would accept.**
