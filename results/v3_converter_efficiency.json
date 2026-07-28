@@ -15,58 +15,58 @@
       "100%": 0.85
     }
   },
-  "finding": "a flat 0.9 round-trip efficiency overstates net arbitrage revenue by 8.5 % against the same schedule settled under a load-dependent converter model; putting the loss curve inside the optimiser recovers 30.3 % of that, by moving mean discharge load from 87% to 51% of rated power \u2014 toward the efficiency peak near half load rather than toward maximum power",
+  "finding": "a flat 0.9 round-trip efficiency overstates net arbitrage revenue by 8.5 % against the same schedule settled under a load-dependent converter model; putting the loss curve inside the optimiser recovers 13.3 % of that, by moving mean discharge load from 87% to 50% of rated power \u2014 toward the efficiency peak near half load rather than toward maximum power",
   "table": [
     {
       "hvac_MW": 0.0,
       "aux_standing_MW": 1.173,
       "reported_net_GBP": 329209,
       "actual_net_GBP": 303488,
-      "aware_net_GBP": 395438,
+      "aware_net_GBP": 343974,
       "overstatement_pct": 8.5,
-      "recovered_by_modelling_pct": 30.3,
+      "recovered_by_modelling_pct": 13.3,
       "reported_GBP_per_MW_yr": 13276,
       "actual_GBP_per_MW_yr": 12239,
-      "aware_GBP_per_MW_yr": 15947,
+      "aware_GBP_per_MW_yr": 13871,
       "delivered_fraction_of_flat_schedule": 0.988,
       "efc_flat": 432.9,
-      "efc_aware": 435.0,
+      "efc_aware": 433.1,
       "mean_discharge_load_frac_flat": 0.874,
-      "mean_discharge_load_frac_aware": 0.512
+      "mean_discharge_load_frac_aware": 0.502
     },
     {
       "hvac_MW": 0.25,
       "aux_standing_MW": 1.423,
       "reported_net_GBP": 235248,
       "actual_net_GBP": 209528,
-      "aware_net_GBP": 301478,
+      "aware_net_GBP": 250014,
       "overstatement_pct": 12.3,
-      "recovered_by_modelling_pct": 43.9,
+      "recovered_by_modelling_pct": 19.3,
       "reported_GBP_per_MW_yr": 9487,
       "actual_GBP_per_MW_yr": 8450,
-      "aware_GBP_per_MW_yr": 12158,
+      "aware_GBP_per_MW_yr": 10082,
       "delivered_fraction_of_flat_schedule": 0.988,
       "efc_flat": 432.9,
-      "efc_aware": 435.0,
+      "efc_aware": 433.1,
       "mean_discharge_load_frac_flat": 0.874,
-      "mean_discharge_load_frac_aware": 0.512
+      "mean_discharge_load_frac_aware": 0.502
     },
     {
       "hvac_MW": 0.5,
       "aux_standing_MW": 1.673,
       "reported_net_GBP": 141288,
       "actual_net_GBP": 115567,
-      "aware_net_GBP": 207518,
+      "aware_net_GBP": 156054,
       "overstatement_pct": 22.3,
-      "recovered_by_modelling_pct": 79.6,
+      "recovered_by_modelling_pct": 35.0,
       "reported_GBP_per_MW_yr": 5698,
       "actual_GBP_per_MW_yr": 4660,
-      "aware_GBP_per_MW_yr": 8369,
+      "aware_GBP_per_MW_yr": 6293,
       "delivered_fraction_of_flat_schedule": 0.988,
       "efc_flat": 432.9,
-      "efc_aware": 435.0,
+      "efc_aware": 433.1,
       "mean_discharge_load_frac_flat": 0.874,
-      "mean_discharge_load_frac_aware": 0.512
+      "mean_discharge_load_frac_aware": 0.502
     }
   ]
 }

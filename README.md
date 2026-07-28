@@ -108,10 +108,10 @@ load), the curve is:
 |---|---|---|
 | flat efficiency, as the model reports it | 329,209 | overstated by 8.5 % |
 | the same schedule, settled under the real curve | 303,488 | — |
-| optimised with the curve inside the program | 395,438 | +30.3 % |
+| optimised with the curve inside the program | 343,974 | +13.3 % |
 
 The first gap is the accounting error. The second is the operating error, and it is
-larger: knowing the curve moves mean discharge from 87 % to 51 % of rated power,
+the larger of the two: knowing the curve moves mean discharge from 87 % to 50 % of rated power,
 toward the efficiency peak, rather than pushing for maximum power whenever the
 spread looks good. A model carrying a constant 0.9 cannot see that trade-off exists.
 
@@ -121,6 +121,31 @@ at all: it runs whether or not the battery cycles. The converter's no-load loss
 management is swept on top rather than asserted, because published BESS auxiliary
 figures vary too widely to pick one. At 0.5 MW of thermal load the accounting error
 grows from 8.5 % to 22.3 %.
+
+**5. Pricing wear by service rather than by the megawatt-hour changes what the
+battery does, not just what it reports.**
+
+Module tests under real grid duty profiles put peak-shifting ageing at 1.81–1.92×
+frequency regulation at comparable throughput. Carrying that distinction into the
+optimiser, rather than one degradation cost for all energy:
+
+| reserve price (£/MW/h) | mean reserve held, one cost | with 1.85× ratio | cycling change | net change |
+|---|---|---|---|---|
+| 2 | 17.9 MW | 27.4 MW (+53 %) | −13 % | +10.2 % |
+| 5 | 38.3 MW | 40.3 MW (+5 %) | −10 % | +11.6 % |
+| 10 | 45.2 MW | 45.6 MW (+1 %) | −8 % | +7.6 % |
+
+The effect is largest where the choice is genuinely open: at a low reserve price the
+single-cost model keeps the battery in the wholesale market, while the differentiated
+model recognises that reserve duty is gentler on the cells and moves half again as
+much capacity into it. At high reserve prices both models go to reserve anyway and
+the distinction only affects the books.
+
+This one rests on the shakiest assumption in the project, and it is stated in the
+code: mapping a capacity-loss ratio onto a marginal-cost ratio presumes damage
+accumulates linearly with throughput, which is the approximation degradation physics
+is known to violate. The ratio is therefore swept from 1.0 to 2.5 rather than
+asserted.
 
 ## What is different here
 
@@ -150,6 +175,27 @@ open (verified 2026-07-28); existing Python wrappers for them are unmaintained, 
 the client is self-contained and caches to parquet. One command reproduces every
 number above from nothing.
 
+## Verification
+
+`scripts/verify.py` asserts the invariants that a plausible-looking model can still
+violate. Every check exists because something went wrong once:
+
+- state of charge is the exact integral of what crossed the terminals, under both the
+  flat and the load-dependent loss model
+- reserve is always deliverable when the headroom constraint is on, and demonstrably
+  undeliverable when it is off, so the experiment measures what it claims to
+- the tangent representation of converter loss reproduces the analytic curve to 0.01 %
+  of rated power
+- field anchoring reproduces the degradation rate it targets, to machine precision
+- no forecast feature at time t responds to a price at t or later, verified by
+  perturbing a future price and confirming that no earlier feature row moves
+
+The suite earned its place immediately: it found that the convex loss relaxation was
+degenerate during negative prices, where the program could profit from overstating
+charging loss. Before the fix, finding 4 read "+30.3 %"; after it, "+13.3 %". A
+headline number was inflated by a factor of 2.3 by a bug that produced entirely
+plausible schedules and revenues.
+
 ## Reproducing
 
 ```bash
@@ -157,6 +203,9 @@ pip install -r requirements.txt
 PYTHONPATH=src python3 scripts/v0_arbitrage.py        2025-01-01 2025-03-31
 PYTHONPATH=src python3 scripts/v1_reserve_headroom.py 2025-01-01 2025-03-31
 PYTHONPATH=src python3 scripts/v2_capture_rate.py     2024-01-01 2025-12-31
+PYTHONPATH=src python3 scripts/v3_converter_efficiency.py       2025-01-01 2025-06-30
+PYTHONPATH=src python3 scripts/v4_service_differentiated_cdeg.py 2025-01-01 2025-06-30
+PYTHONPATH=src python3 scripts/verify.py
 PYTHONPATH=src python3 scripts/make_figures.py
 ```
 
