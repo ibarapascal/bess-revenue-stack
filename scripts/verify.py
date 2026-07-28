@@ -102,11 +102,20 @@ def check_converter_envelope():
     # excludes auxiliaries. Anchoring to that paper's auxiliary-*inclusive* global
     # efficiency (0.85 / 0.65) is what an earlier version did, and it double-counted
     # every auxiliary term the model adds on top.
+    # Reproducing the two calibration points is nearly tautological — the coefficients
+    # are solved from them. The test that can actually fail is out-of-sample: the source
+    # paper publishes a fitted curve over eleven setpoints, and the two-point fit here
+    # must track it at loads it was never given. Values below are that paper's year-one
+    # curve evaluated at 0.2, 0.3 and 0.5 p.u.
+    for load, target in ((0.20, 0.869), (0.30, 0.905), (0.50, 0.931)):
+        got = float(conv.round_trip(np.array([load * 50]))[0])
+        check(f"matches the published curve at {load:.0%} load, which it was not fitted to",
+              abs(got - target) < 0.02, f"{got:.3f} against {target:.3f}")
     eff = conv.round_trip(np.array([0.1, 1.0]) * 50)
-    check("converter reproduces its calibration points",
+    check("calibration points are recovered by the two-point solve",
           abs(eff[0] - 0.771) < 0.01 and abs(eff[1] - 0.937) < 0.01,
-          f"round trip {eff[0]:.3f} at 10 % load, {eff[1]:.3f} at rated "
-          f"(AC round trip, auxiliary-excluded)")
+          f"round trip {eff[0]:.3f} at 10 % load, {eff[1]:.3f} at rated — true by "
+          f"construction, so this only tests the algebra, not the calibration")
     check("calibration is not the auxiliary-inclusive metric",
           eff[1] > 0.90,
           f"{eff[1]:.3f} at rated is the AC-terminal figure; the global figure of "
@@ -114,40 +123,63 @@ def check_converter_envelope():
 
 
 def check_degradation_anchor():
-    """Field anchoring must actually reproduce the field loss rate it targets."""
-    for target in (0.014, 0.02, 0.03):
-        dc = DegradationCost(cell_model="prismatic_250ah", field_annual_loss=target)
-        implied = dc.loss_per_efc() * dc.anchor_factor() * dc.field_efc_per_year
-        check(f"anchoring reproduces {target:.1%}/yr", abs(implied - target) < 1e-9,
-              f"implied {implied:.4%}")
-    dc = DegradationCost(field_annual_loss=0.02)
-    ratio = dc.cost("arbitrage") / dc.cost("frequency")
+    """Field anchoring must reproduce the field case, and c_deg must price only wear
+    that throughput actually causes."""
+    dc = DegradationCost(cell_model="prismatic_250ah")
+    days, n = dc.field_years * 365.25, dc.field_efc_per_year * dc.field_years
+    implied = dc._model().cumulative_loss(days, n) * dc.anchor_factor()
+    observed = dc.field_annual_loss * dc.field_years
+    check("anchoring reproduces the field plant's measured loss",
+          abs(implied - observed) < 1e-9,
+          f"{implied:.4%} against {observed:.4%} over {dc.field_years:.0f} years "
+          f"and {n:.0f} cycles")
+
+    # The anchor scales a model that already nearly fits. A scale far from one means
+    # the model is being forced, which is what a missing power-law exponent looks like.
+    a = dc.anchor_factor()
+    check("the anchor is a correction, not a rescue", 0.2 < a < 5.0,
+          f"scale {a:.3f} — an unanchored cell model landing this close to a system it "
+          f"was never fitted to is the check that the exponents are applied")
+
+    # Cycle life implied by the parameterisation, against what large-format LFP is
+    # warranted for. Treating the power-law coefficients as linear rates put this at
+    # 911 cycles, which no grid battery would be sold with.
+    life = dc.implied_cycle_life()
+    check("implied cycle life is physically plausible", 2000 < life < 12000,
+          f"{life:,.0f} equivalent full cycles to 80 % capacity")
+
+    # c_deg must not carry calendar ageing. Calendar fade is independent of throughput,
+    # so charging it per cycle would make the cost rise with the plant's age at a fixed
+    # cycle count; it must not.
+    young = DegradationCost(field_years=3.0).cost("arbitrage")
+    old = DegradationCost(field_years=3.0, reference_cycles=3000).cost("arbitrage")
+    check("c_deg falls as cycles accumulate, as a sub-linear wear law requires",
+          old < young, f"{young:.2f} at 1000 cycles against {old:.2f} at 3000")
+
+    dc2 = DegradationCost(field_annual_loss=0.02)
+    ratio = dc2.cost("arbitrage") / dc2.cost("frequency")
     check("service differentiation carries the measured ratio",
           abs(ratio - 1.85) < 1e-9, f"arbitrage/frequency = {ratio:.3f}")
-    # The anchor pins the level; the cell model is supposed to supply the response to
-    # operating conditions. If the anchor is evaluated at the caller's operating point
-    # instead of a fixed reference, the two cancel and the cell model contributes
-    # nothing — which is exactly what happened, undetected, until it was checked.
-    a = DegradationCost(cell_model="sony_murata_3ah").base_cost(dod=0.6)
-    b = DegradationCost(cell_model="prismatic_250ah").base_cost(dod=0.6)
-    check("cell model actually influences c_deg away from the anchor point",
-          abs(a - b) / max(a, b) > 0.01,
-          f"{a:.2f} vs {b:.2f} GBP/MWh at 60 % depth — identical values would mean "
-          f"the anchor had cancelled the model it is meant to scale")
-    ref = DegradationCost(cell_model="prismatic_250ah")
-    closed = (ref.replacement_cost_per_mwh
-              / (1 + ref.discount_rate) ** ref.expected_life_years
-              * ref.field_annual_loss / ref.field_efc_per_year
-              / (1 - ref.eol_fraction) / ref.REF_DOD)
-    check("at the reference point c_deg is the four-input closed form",
-          abs(ref.base_cost() - closed) < 1e-9,
-          f"{ref.base_cost():.6f} = {closed:.6f} — only one of those four inputs is "
-          f"a field observation, which is why the others are swept")
 
-    unanchored = DegradationCost(cell_model="prismatic_250ah", field_annual_loss=None)
-    check("raw cell model would over-predict field loss",
-          unanchored.loss_per_efc() * 300 > 0.05,
-          f"{unanchored.loss_per_efc()*300:.1%}/yr at 300 EFC — why anchoring is not optional")
+    # A stated validity limit that nothing consults is decoration. This asserts the
+    # warning actually fires, which it did not for the first several versions.
+    import warnings as _w
+    with _w.catch_warnings(record=True) as caught:
+        _w.simplefilter("always")
+        DegradationCost(cell_model="prismatic_250ah").cost("arbitrage", dod=0.3)
+    check("operating outside the fitted range raises a warning",
+          any("extrapolation" in str(x.message) for x in caught),
+          "depth of 0.30 is below the model's stated 0.80-1.00 validity range")
+
+    # The Sony model's calendar term is a sigmoid upstream and is not implemented, so
+    # it must refuse to be anchored rather than return a number.
+    try:
+        MODELS["sony_murata_3ah"]().cumulative_loss(1000.0, 300.0)
+        ok = False
+    except NotImplementedError:
+        ok = True
+    check("an unimplemented ageing term refuses to produce a number", ok,
+          "the Sony calendar term raises instead of returning several hundred per cent")
 
 
 def check_forecast_leakage(df):
@@ -239,10 +271,11 @@ def check_published_numbers():
               - gbm["deg_cost_GBP"] - gbm["net_GBP"]) < 2,
           f"{pf['gross_GBP']:,} − {pf['gross_GBP']-gbm['gross_GBP']:,} − "
           f"{gbm['deg_cost_GBP']:,} = {gbm['net_GBP']:,}")
-    check("net capture is far below gross capture",
-          gbm["capture_gross_pct"] - gbm["capture_net_pct"] > 20,
-          f"gross {gbm['capture_gross_pct']}% against net {gbm['capture_net_pct']}% — "
-          f"the gap is finding 3")
+    check("net capture stays below gross capture",
+          gbm["capture_net_pct"] < gbm["capture_gross_pct"] - 2,
+          f"gross {gbm['capture_gross_pct']}% against net {gbm['capture_net_pct']}% — the "
+          f"direction is the finding; the size of the gap scales with the wear price and is "
+          f"deliberately not pinned")
 
     v3 = load("v3_converter_efficiency.json")
     zero = v3["table"][0]
@@ -253,10 +286,17 @@ def check_published_numbers():
 
     v4 = load("v4_service_cdeg.json")
     lowest = v4["deltas_vs_flat"][0]
-    check("the reserve-market entry flip is still present at the lowest price",
-          lowest["enters_market_only_when_differentiated"],
-          f"single-cost holds {lowest['reserve_MW_flat']:.2f} MW, differentiated "
-          f"{lowest['reserve_MW_diff']:.1f} MW")
+    check("service differentiation still raises reserve holdings",
+          all(d["reserve_change_MW"] > 0 for d in v4["deltas_vs_flat"]),
+          f"largest shift {lowest['reserve_change_MW']:.1f} MW at the lowest reserve price; "
+          f"whether it flips participation outright depends on the wear price and is a "
+          f"regime statement, not a pinned result")
+    # The finding text is generated from the data and once asserted an outright refusal to
+    # enter the market while the same file recorded 20 MW held. Text and data must agree.
+    claims_flip = "declines the reserve market outright" in v4["finding"]
+    check("the generated finding text matches the data it was generated from",
+          claims_flip == lowest["enters_market_only_when_differentiated"],
+          "narrative and numbers agree on whether participation flips")
 
 
 def main():

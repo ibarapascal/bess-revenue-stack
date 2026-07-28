@@ -65,7 +65,6 @@ class ConverterModel:
     eta_at_low: float = 0.878
     low_load_frac: float = 0.10
     aux_standing_mw: float = 0.0       # thermal management, always on
-    aux_per_mwh: float = 0.0           # extra auxiliary energy per MWh cycled
 
     def __post_init__(self):
         # Solve p_fixed, k1, k2 from the two efficiency points plus the requirement

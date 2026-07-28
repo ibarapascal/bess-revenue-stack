@@ -30,6 +30,7 @@ the *level*, via calibrate_to_field().
 """
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -66,7 +67,14 @@ class SonyMurata3Ah:
     q5_b2: float = 2.11559710307295e-06
 
     def calendar_rate(self, t_kelvin, soc):
-        """Fractional capacity loss per sqrt(day) of storage."""
+        """Rate parameter of the calendar term. NOT a capacity loss per unit time.
+
+        Upstream evolves calendar fade with a sigmoid state update in which this value
+        is the rate constant, so it cannot be multiplied by time — or by any power of
+        time — to obtain a loss. Doing so gives several hundred per cent per year. The
+        sigmoid is not implemented here, which is why cumulative_loss below refuses to
+        run for this model.
+        """
         ua = _ua_from_soc(soc)
         return abs(self.q1_b0
                    * np.exp(self.q1_b1 * (1.0 / t_kelvin ** 2) * np.sqrt(np.abs(ua)))
@@ -78,6 +86,24 @@ class SonyMurata3Ah:
         c_rate = np.asarray(c_rate, dtype=float)
         return abs(self.q5_b0 + self.q5_b1 * dod
                    + self.q5_b2 * np.exp(np.clip(dod ** 2 * c_rate ** 3, None, 50.0)))
+
+    # Upstream applies no power-law exponent to this model's cycle term, so throughput
+    # ageing is linear here. The calendar term has no usable exponent at all: see
+    # calendar_rate.
+    p_cal: float = float("nan")
+    p_cyc: float = 1.0
+
+    def cumulative_loss(self, t_days, n_efc, t_kelvin=298.15, soc=0.5, dod=0.9, c_rate=0.5):
+        raise NotImplementedError(
+            "the calendar term of the Sony/Murata model is a sigmoid state update "
+            "upstream and is not implemented here, so total loss cannot be formed and "
+            "this model cannot be field-anchored. Its cycle term is usable on its own "
+            "via cycle_rate/marginal_cycle_loss; prismatic_250ah is the anchored default.")
+
+    def marginal_cycle_loss(self, n_efc, dod=0.9, c_rate=0.5, t_kelvin=298.15):
+        """d(loss)/d(cycle) at n_efc cycles already accumulated."""
+        n = max(float(n_efc), 1.0)
+        return float(self.p_cyc * self.cycle_rate(dod, c_rate) * n ** (self.p_cyc - 1.0))
 
 
 @dataclass
@@ -107,10 +133,48 @@ class Prismatic250Ah:
         return (self.p4 + self.p5 * dod + self.p6 * np.asarray(c_rate, dtype=float)) \
             * (np.exp(self.p7 / t_kelvin) + np.exp(-self.p8 / t_kelvin))
 
-    def warn_out_of_range(self, dod):
-        lo, hi = self.dod_valid
-        frac = float(np.mean((np.asarray(dod) < lo) | (np.asarray(dod) > hi)))
-        return frac
+    def cumulative_loss(self, t_days, n_efc, t_kelvin=298.15, soc=0.5, dod=0.9, c_rate=0.5):
+        """Capacity lost after t_days of storage and n_efc equivalent full cycles.
+
+        Both terms are power laws, not linear rates. Treating the coefficients as
+        per-day and per-cycle losses — which an earlier version did, because the
+        exponents were declared and then never used — overstates three years of this
+        plant's degradation by a factor of sixteen, and was what made field anchoring
+        look mandatory rather than a modest correction.
+        """
+        return (self.calendar_rate(t_kelvin, soc) * np.power(t_days, self.p_cal)
+                + self.cycle_rate(dod, c_rate, t_kelvin) * np.power(n_efc, self.p_cyc))
+
+    def marginal_cycle_loss(self, n_efc, dod=0.9, c_rate=0.5, t_kelvin=298.15):
+        """d(loss)/d(cycle) at n_efc cycles already accumulated.
+
+        This, not the coefficient, is what a degradation *cost* per MWh needs: the
+        wear caused by one more cycle. Because the exponent is below one it falls as
+        the asset ages, so c_deg is not a constant.
+        """
+        n = max(float(n_efc), 1.0)
+        return float(self.p_cyc * self.cycle_rate(dod, c_rate, t_kelvin)
+                     * n ** (self.p_cyc - 1.0))
+
+    def warn_out_of_range(self, dod=None, t_kelvin=None):
+        """Return the stated validity violations at this operating point.
+
+        This used to exist without ever being called, while the module docstring
+        claimed shallow cycling was "flagged, not silently allowed". It is now called
+        from DegradationCost, because a validity limit nothing consults is decoration.
+        """
+        out = []
+        if dod is not None:
+            lo, hi = self.dod_valid
+            if float(np.min(dod)) < lo or float(np.max(dod)) > hi:
+                out.append(f"depth of discharge {float(np.min(dod)):.2f}-{float(np.max(dod)):.2f} "
+                           f"outside the fitted range {lo:.2f}-{hi:.2f}")
+        if t_kelvin is not None and hasattr(self, "temp_valid"):
+            lo, hi = self.temp_valid
+            if not (lo <= float(t_kelvin) <= hi):
+                out.append(f"temperature {float(t_kelvin)-273.15:.0f} degC outside the fitted "
+                           f"range {lo-273.15:.0f}-{hi-273.15:.0f} degC")
+        return out
 
 
 MODELS = {"sony_murata_3ah": SonyMurata3Ah, "prismatic_250ah": Prismatic250Ah}
@@ -179,6 +243,7 @@ class DegradationCost:
     # silently suppress all trading.
     field_annual_loss: float | None = 0.0137      # None disables anchoring
     field_efc_per_year: float = 118.7
+    field_years: float = 3.0
     # Anchoring needs a *pair*: a loss rate is meaningless without the cycling that
     # produced it. Only one public field case reports both — the Italian utility-scale
     # plant, 356 equivalent full cycles over three years to 95.88 %% state of health,
@@ -186,52 +251,82 @@ class DegradationCost:
     # EPRI cases give a loss rate without a cycle count, so using them requires an
     # assumed EFC and is treated as sensitivity rather than calibration.
     #
-    # Making the anchor self-consistent with the model's own cycling (a fixed point
-    # in EFC) was considered and rejected: it would assume this asset cycles at the
-    # same rate as the field systems, which is precisely what is unknown. Iterating
-    # to that fixed point moves c_deg from 30.6 to about 10.9 GBP/MWh, so the choice
-    # is not cosmetic and is stated rather than buried.
+    # The anchor scales the whole model — calendar and cycle together — so that its
+    # predicted loss over the field plant's own life matches what was measured. With
+    # the power laws applied that scale is about 0.83, i.e. the cell model very nearly
+    # reproduces a system it was never fitted to. An earlier version divided the field's
+    # *total* loss by a *cycle-only* model term, which charged calendar ageing to the
+    # marginal cycle and inflated c_deg roughly threefold. Calendar fade happens whether
+    # or not the asset trades, so it is a cost of ownership, not of throughput.
     #
-    # What the anchor does *not* do is make c_deg a measured quantity. At the
-    # reference operating point it reduces to
-    #     replacement_cost * discount_factor * field_loss / field_EFC / usable / dod
-    # in which only the field pair is observed. The other three inputs are
-    # conventions, and the result is sensitive to them: sweeping the discount rate
-    # over 0-12 %% moves c_deg from 76.9 to 19.8 GBP/MWh, replacement cost over
-    # 80-160 k/MWh from 20.4 to 40.7, and assumed life over 8-15 years from 41.6 to
-    # 24.3. "Field-anchored" names one factor out of four, not the product.
+    # Chemistry caveat that anchoring cannot remove: the field plant is NMC, the cell
+    # models are LFP. The anchor transfers a level between chemistries that age at
+    # different rates and with different calendar-to-cycle splits.
+    reference_cycles: float = 1000.0
+    # c_deg is the marginal wear of one more cycle, and the cycle exponent is below one,
+    # so it declines over life: about 15.4 GBP/MWh at 250 cumulative cycles and 10.0 at
+    # 3000. A single number has to name a point on that curve; 1000 EFC is roughly
+    # mid-life for an asset cycling a few hundred times a year, and v0 sweeps it.
+    #
+    # What the anchor does *not* do is make c_deg a measured quantity. It is
+    #     replacement_cost * discount_factor * marginal_loss / usable / dod
+    # and only the field pair inside marginal_loss is observed. The other inputs are
+    # conventions, and the result is sensitive to them: sweeping the discount rate over
+    # 0-12 %% moves c_deg by roughly a factor of four, replacement cost over 80-160 k/MWh
+    # by a factor of two, assumed life over 8-15 years by a factor of 1.7.
 
-    def loss_per_efc(self, dod: float = 0.9, c_rate: float = 0.5, t_kelvin: float = 298.15) -> float:
-        m = MODELS[self.cell_model]()
-        if self.cell_model == "prismatic_250ah":
-            return float(m.cycle_rate(dod, c_rate, t_kelvin))
-        return float(m.cycle_rate(dod, c_rate))
+    def _model(self):
+        return MODELS[self.cell_model]()
+
+    def loss_per_efc(self, dod: float = 0.9, c_rate: float = 0.5, t_kelvin: float = 298.15,
+                     n_efc: float | None = None) -> float:
+        """Marginal capacity loss of one more equivalent full cycle, unanchored."""
+        n = self.reference_cycles if n_efc is None else n_efc
+        m = self._model()
+        if hasattr(m, "warn_out_of_range"):
+            for msg in m.warn_out_of_range(dod=dod, t_kelvin=t_kelvin):
+                warnings.warn(f"{self.cell_model}: {msg}; the result is an extrapolation",
+                              RuntimeWarning, stacklevel=2)
+        return float(m.marginal_cycle_loss(n, dod=dod, c_rate=c_rate, t_kelvin=t_kelvin))
 
     # Operating point the field anchor is defined at. The anchor must be computed
-    # here and nowhere else: an earlier version evaluated it at the *caller's* depth
+    # here and nowhere else: an earlier version evaluated it at the caller's depth
     # of discharge, so the cell model's loss term appeared in the numerator and the
-    # denominator at the same depth and cancelled exactly. c_deg then reduced to a
-    # closed form containing no cell model at all — two cell models whose loss per
-    # cycle differs by a factor of 11.6 returned identical values to nine decimals,
-    # and the apparent depth response was just the 1/dod normalisation at the end of
-    # base_cost. Pinning the reference restores a real depth response.
+    # denominator at the same depth and cancelled exactly.
     REF_DOD, REF_C_RATE, REF_T_KELVIN = 0.9, 0.5, 298.15
 
     def anchor_factor(self) -> float:
-        """Scale that reconciles the cell model with observed field loss.
+        """Scale reconciling the cell model with the field plant's observed loss.
 
-        Defined at the reference operating point only, so that departures from it
-        carry the cell model's response while the level stays pinned to the field.
+        Compares like with like: total modelled loss (calendar plus cycle) over the
+        field plant's own duration and cycle count, against its measured total loss.
         """
         if self.field_annual_loss is None:
             return 1.0
-        modelled = self.loss_per_efc(self.REF_DOD, self.REF_C_RATE,
-                                     self.REF_T_KELVIN) * self.field_efc_per_year
-        return float(self.field_annual_loss / max(modelled, 1e-12))
+        days = self.field_years * 365.25
+        n = self.field_efc_per_year * self.field_years
+        modelled = float(self._model().cumulative_loss(
+            days, n, t_kelvin=self.REF_T_KELVIN, soc=0.5,
+            dod=self.REF_DOD, c_rate=self.REF_C_RATE))
+        observed = self.field_annual_loss * self.field_years
+        return float(observed / max(modelled, 1e-12))
 
-    def base_cost(self, dod: float = 0.9, c_rate: float = 0.5, t_kelvin: float = 298.15) -> float:
+    def implied_cycle_life(self) -> float:
+        """Equivalent full cycles to end of life from cycling alone, as a sanity check.
+
+        A value far outside the 4000-10000 that large-format LFP is warranted for means
+        the parameterisation is wrong, and that is how the missing exponents surfaced.
+        """
+        m = self._model()
+        k = float(m.cycle_rate(self.REF_DOD, self.REF_C_RATE, self.REF_T_KELVIN)
+                  if self.cell_model == "prismatic_250ah"
+                  else m.cycle_rate(self.REF_DOD, self.REF_C_RATE)) * self.anchor_factor()
+        return float(((1.0 - self.eol_fraction) / k) ** (1.0 / m.p_cyc))
+
+    def base_cost(self, dod: float = 0.9, c_rate: float = 0.5, t_kelvin: float = 298.15,
+                  n_efc: float | None = None) -> float:
         """c_deg in currency per MWh of throughput, before service differentiation."""
-        loss = self.loss_per_efc(dod, c_rate, t_kelvin) * self.anchor_factor()
+        loss = self.loss_per_efc(dod, c_rate, t_kelvin, n_efc) * self.anchor_factor()
         usable = 1.0 - self.eol_fraction
         disc = 1.0 / (1.0 + self.discount_rate) ** self.expected_life_years
         # cost of consuming `loss` of the usable life, per full cycle, spread over

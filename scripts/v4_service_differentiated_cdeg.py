@@ -119,18 +119,23 @@ def main(start: str, end: str):
                    "the sensitivity to that assumption"),
         "deltas_vs_flat": deltas,
         "finding": (
-            "the distinction decides market participation, not just bookkeeping. At the lowest "
-            "reserve price tested the single-cost model declines the reserve market outright, "
-            f"holding {deltas[0]['reserve_MW_flat']:.2f} MW, while pricing reserve duty at the "
-            f"measured 1.85x lower ageing commits {deltas[0]['reserve_MW_diff']:.1f} MW to it — a "
-            "binary difference in whether the asset participates at all, which no percentage "
-            "captures. Where both models do participate the shift is smaller "
-            f"({min(d['reserve_change_MW'] for d in deltas[1:]):.1f} to "
-            f"{max(d['reserve_change_MW'] for d in deltas[1:]):.1f} MW), but cycling falls by "
-            f"{abs(max(d['efc_change_pct'] for d in deltas)):.0f}-"
-            f"{abs(min(d['efc_change_pct'] for d in deltas)):.0f} % and net revenue rises by "
-            f"{min(d['net_change_pct'] for d in deltas):.0f}-"
-            f"{max(d['net_change_pct'] for d in deltas):.0f} % throughout"),
+            (f"the single-cost model declines the reserve market outright at the lowest "
+             f"price tested, holding {deltas[0]['reserve_MW_flat']:.2f} MW, while pricing "
+             f"reserve duty at the measured 1.85x lower ageing commits "
+             f"{deltas[0]['reserve_MW_diff']:.1f} MW — a binary difference in whether the "
+             f"asset participates at all. "
+             if deltas[0]["enters_market_only_when_differentiated"] else
+             f"at every reserve price tested both models participate, so the distinction "
+             f"changes how much capacity is committed rather than whether the asset enters "
+             f"the market: reserve holdings rise by "
+             f"{min(d['reserve_change_MW'] for d in deltas):.1f} to "
+             f"{max(d['reserve_change_MW'] for d in deltas):.1f} MW. Whether it can flip "
+             f"participation depends on the degradation price — at a c_deg high enough to "
+             f"make reserve marginal under a single cost, it does. ")
+            + f"Cycling falls by {abs(max(d['efc_change_pct'] for d in deltas)):.0f}-"
+              f"{abs(min(d['efc_change_pct'] for d in deltas)):.0f} % and net revenue rises by "
+              f"{min(d['net_change_pct'] for d in deltas):.0f}-"
+              f"{max(d['net_change_pct'] for d in deltas):.0f} % throughout"),
         "table": rows,
     }
     (OUT / "v4_service_cdeg.json").write_text(json.dumps(summary, indent=2))

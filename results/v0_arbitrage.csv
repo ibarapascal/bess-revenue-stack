@@ -1,5 +1,5 @@
 scenario,assumed_efc_per_year,c_deg,gross_energy_GBP,deg_cost_GBP,net_GBP,efc_per_year,GBP_per_MW_year
 no degradation cost,,0.0,4169625,0,4169625,729.2,45295
-"Italian field pair, 1.37 %/yr at 119 EFC",118.7,30.56,3150433,1367349,1783084,243.1,19370
-"EPRI 2.3 %/yr, EFC assumed 300",300.0,20.3,3620686,1286705,2333982,344.3,25354
-"German upper 3 %/yr, EFC assumed 300",300.0,26.47,3345793,1366070,1979724,280.3,21506
+"Italian field pair, 1.37 %/yr at 119 EFC",118.7,12.09,3936880,1002845,2934034,450.6,31873
+"EPRI 2.3 %/yr, EFC assumed 300",300.0,12.23,3932738,1010689,2922049,448.8,31743
+"German upper 3 %/yr, EFC assumed 300",300.0,15.96,3805544,1174352,2631192,399.8,28583

@@ -10,11 +10,11 @@ March 2024 to January 2026, every finding on the same asset and the same window.
 
 | # | shortcut | what it costs | the catch |
 |---|---|---|---|
-| 1 | pricing wear at zero | overstates net revenue **79–134 %**, and implies 729 full cycles a year against 243 | the wear price itself is a four-input calculation, only one of which is measured |
-| 2 | no state-of-charge headroom for reserve | overstates **2–13 %** — at £2/MW/h it commits 44.3 MW of reserve against 25.0 MW it could deliver | reserve prices here are a synthetic sweep, not market data |
-| 3 | assuming you can forecast | a real forecast captures **53 % of gross margin but only 21 % of net** | wear is charged on every cycle, right or wrong, so it amplifies forecast error instead of scaling with it |
-| 4 | one flat round-trip efficiency | **the two errors inside it have opposite signs** — with no thermal load the flat assumption is 0.4 % *low*, and all the overstatement (to 15.5 %) is the auxiliary load nobody models | holds for a 2-hour asset discharging at 86 % of rated; a longer-duration asset may well flip it |
-| 5 | one wear price for every service | decides **whether the battery enters the reserve market at all** — 0.00 MW under one price, 25.0 MW when reserve duty is priced at its measured 1.85× lower ageing | the flip sits between ageing ratios of 1.5 and 1.85, and the supporting studies straddle that |
+| 1 | pricing wear at zero | overstates net revenue **42–59 %**, and implies 729 full cycles a year against 451 | the wear price is a four-input calculation and only one input is measured |
+| 2 | no state-of-charge headroom for reserve | overstates **3–15 %** — at £2/MW/h it commits 40.1 MW of reserve against 26.5 MW it could deliver | reserve prices here are a synthetic sweep, not market data |
+| 3 | assuming you can forecast | a real forecast captures **60 % of gross margin but only 48 % of net** | the gap is real but modest; it widens as the wear price rises, so it is a claim about degradation-aware models, not about forecasting |
+| 4 | one flat round-trip efficiency | **the two errors inside it have opposite signs and mostly cancel** — with no thermal load the flat assumption is 2.9 % *low*, and what overstatement remains (to 5.7 %) is entirely the auxiliary load | holds for a 2-hour asset discharging at 86 % of rated; a longer-duration asset may flip it |
+| 5 | one wear price for every service | shifts reserve holdings by **0.3–6.2 MW**, cuts cycling 6–9 % and raises net revenue 5–8 % | it does not change *whether* the asset enters the reserve market at this wear price; at a higher one it would |
 
 Findings 1, 2, 4 and 5 compare two arms under perfect foresight, which is an unreachable
 upper bound used because both arms share it. Finding 3 is the one that measures what
@@ -22,19 +22,19 @@ losing it costs.
 
 ![waterfall](figures/waterfall.png)
 
-Stacked together on the forecast-driven case: of £3.15m of perfect-foresight gross margin,
-forecast error removes £1.49m and degradation cost removes a further £1.28m, leaving
-£0.38m.
+Stacked together on the forecast-driven case: of £3.93m of perfect-foresight gross margin,
+forecast error removes £1.57m and degradation cost removes a further £0.95m, leaving
+£1.42m.
 
 Two qualifications belong next to that number rather than deeper in the page. It describes
 a **wholesale-only strategy indexed to the half-hourly reference price** — a real GB
 battery also trades the day-ahead auction, where the clearing price is known at gate
 closure and forecast error costs far less, so £0.38m is the achievable revenue of the
 forecast-dependent leg, not of the asset. And the size of the gap is set by how wear is
-priced: **8.3× at £30.6/MWh, 4.1× at the £20.3/MWh implied by the EPRI field loss rate**.
-A factor of four to eight, with the degradation price as the dominant input, is the honest
-headline. The top bar is itself the gross margin of a schedule that already prices
-degradation; a model ignoring wear entirely would cycle 729 times a year and print £4.17m.
+priced: **2.8× at the field-anchored £12.1/MWh, 4.1× at £20.3/MWh**. A factor of three to
+four, with the degradation price as the dominant input, is the honest headline. The top bar
+is itself the gross margin of a schedule that already prices degradation; a model ignoring
+wear entirely would cycle 729 times a year and print £4.17m.
 
 This is a controlled experiment on one asset in one market, not a survey. The shortcuts
 are shown to be *costly* here and shown to be *common* by citation — see How this relates
@@ -48,7 +48,7 @@ wider spreads, so choosing a quarter per finding would let each effect be report
 most flattering. Doing the opposite turned out to strengthen the results rather than
 soften them.
 
-**1. Ignoring degradation cost overstates arbitrage revenue by 79–134 % and implies
+**1. Ignoring degradation cost overstates arbitrage revenue by 42–59 % and implies
 cycling no owner would accept.**
 
 A degradation cost cannot be set from an annual loss rate alone: the same 2 %/yr means
@@ -69,28 +69,31 @@ point, but every number published here is *at* the reference point, so none of t
 exercises it. Anchoring pins the level to observed hardware; it does not turn c_deg into
 a measured quantity.
 
-It is also worth saying plainly that £30.6/MWh sits well above published practice —
-industry convention is roughly £2–8/MWh and Gale et al. (2026) use £0.50/MWh for a GB
-asset. The gap is not a modelling slip: those figures are marginal-cost proxies, whereas
-this one is a replacement-cost amortisation over an observed field loss rate. But a
-reader whose prior is £5/MWh should know the disagreement is two orders of magnitude and
-that findings 2 to 5 all run at the £30.6 end.
+£12.1/MWh still sits above published practice — industry convention is roughly £2–8/MWh
+and Gale et al. (2026) use £0.50/MWh for a GB asset — but the difference is now a factor
+of a few rather than the two orders of magnitude an earlier version of this model
+produced. Part of the remaining gap is definitional: those are marginal-cost proxies,
+whereas this is a replacement-cost amortisation over an observed field loss rate. A reader
+whose prior is £5/MWh should know that findings 2 to 5 all run at £12.1, and that halving
+it would move every magnitude here toward the smaller end.
 
 | degradation assumption | c_deg (£/MWh) | net revenue (£) | £/MW/yr | cycles/yr |
 |---|---|---|---|---|
 | ignored, as in many public models | 0 | 4,169,625 | 45,295 | 729 |
-| Italian field pair (1.37 %/yr at 119 EFC) | 30.6 | 1,783,084 | 19,370 | 243 |
-| EPRI 2.3 %/yr, EFC assumed 300 | 20.3 | 2,333,982 | 25,354 | 344 |
-| German upper 3 %/yr, EFC assumed 300 | 26.5 | 1,979,724 | 21,506 | 280 |
+| Italian field pair (1.37 %/yr at 119 EFC) | 12.1 | 2,934,034 | 31,873 | 451 |
+| EPRI 2.3 %/yr, EFC assumed 300 | 12.2 | 2,922,049 | 31,743 | 449 |
+| German upper 3 %/yr, EFC assumed 300 | 16.0 | 2,631,192 | 28,583 | 400 |
 
 ![degradation](figures/degradation.png)
 
 729 equivalent full cycles per year is two a day, every day, for two years. Pricing the
-wear cuts cycling by 53–67 % and removes 79–134 % of the revenue, and the only row
-derived entirely from field observation is the most severe of the three.
+wear cuts cycling by 38–45 % and removes 42–59 % of the revenue. Note how little the three
+rows now differ: once the anchor scales calendar and cycle ageing together, two field cases
+with very different headline loss rates imply almost the same marginal cost per cycle.
+The spread between published field degradation rates matters far less than it appears to.
 
 **2. Omitting the state-of-charge headroom constraint overstates net revenue by
-2–13 %, by selling reserve the battery could not have delivered.**
+3–15 %, by selling reserve the battery could not have delivered.**
 
 A battery paid an availability fee for reserve must hold enough energy to actually
 deliver it:
@@ -105,15 +108,14 @@ availability.
 
 | reserve price (£/MW/h) | net with constraint | net without | overstated by | mean reserve held (MW) |
 |---|---|---|---|---|
-| 2 | 1,893,079 | 2,031,541 | 7.3 % | 25.0 → 44.3 |
-| 5 | 3,719,870 | 4,207,347 | 13.1 % | 43.4 → 45.5 |
-| 10 | 7,431,027 | 7,928,445 | 6.7 % | 47.5 → 46.7 |
-| 20 | 15,234,360 | 15,565,013 | 2.2 % | 48.9 → 48.0 |
+| 2 | 3,326,953 | 3,794,206 | 14.0 % | 26.5 → 40.1 |
+| 5 | 5,036,219 | 5,779,780 | 14.8 % | 40.4 → 42.0 |
+| 10 | 8,552,049 | 9,266,521 | 8.4 % | 45.8 → 44.4 |
+| 20 | 16,203,677 | 16,681,857 | 3.0 % | 48.4 → 47.1 |
 
 The clearest case is £2/MW/h, where the model without the constraint commits nearly twice
-the reserve it can back with energy — 44.3 MW against a deliverable 25.0 MW. The revenue
-error peaks at £5 rather than at £2 because at £2 the battery holds little reserve either
-way, and at £10–20 availability pays so well that both arms saturate; the two rows where
+the reserve it can back with energy — 40.1 MW against a deliverable 26.5 MW. The revenue
+error is largest at £2–5, where the battery must genuinely choose between markets, and at £10–20 availability pays so well that both arms saturate; the two rows where
 adding the constraint slightly *raises* mean reserve are a rescheduling effect, not a
 solver artefact — the constrained problem shifts when it charges in order to keep
 headroom, and ends up holding reserve in more periods at a lower average depth.
@@ -122,55 +124,55 @@ Two disclosures. **The reserve price here is a synthetic flat constant, not mark
 — £2/5/10/20 per MW/h swept, with £20 well above 2024–25 GB clearing levels and included
 as a stress point. Only the energy prices are real. And this experiment's baseline already
 prices reserve wear below arbitrage wear at the 1.85 ratio of finding 5, which is why it
-holds 25.0 MW at £2 while the single-cost model in finding 5 holds none at the same price.
+holds 26.5 MW at £2 while the single-cost arm of finding 5 holds 20.3 MW at the same price.
 The two tables are consistent; they are not the same baseline.
 
-**3. A day-ahead forecast captures 53 % of perfect-foresight gross margin but only
-21 % of net revenue — degradation cost amplifies forecast error rather than scaling
+**3. A day-ahead forecast captures 60 % of perfect-foresight gross margin but only
+48 % of net revenue — degradation cost amplifies forecast error rather than scaling
 with it.**
 
 | arm | forecast MAE (£/MWh) | gross margin | net revenue | net capture |
 |---|---|---|---|---|
-| perfect foresight | 0 | 3,145,765 | 1,781,029 | 100 % |
-| LightGBM day-ahead | 20.1 | 1,656,585 (52.7 %) | 380,743 | 21.4 % |
-| naive (yesterday, same period) | 21.2 | 1,508,628 (48.0 %) | 145,640 | 8.2 % |
+| perfect foresight | 0 | 3,932,212 | 2,930,400 | 100 % |
+| LightGBM day-ahead | 20.1 | 2,365,021 (60.1 %) | 1,419,433 | 48.4 % |
+| naive (yesterday, same period) | 21.2 | 2,128,241 (54.1 %) | 1,126,430 | 38.4 % |
 
-The gap between the gross and net columns is the finding. A battery pays for its own
-wear on every cycle whether or not the trade was profitable, so an imperfect forecast
-loses margin twice: once in the trade, and again in the wear spent chasing it. The
-effect strengthens as the degradation cost rises, which is why the field-derived
-c_deg of £30.6/MWh leaves a thinner net margin for error to eat than a nominal £15
-would.
+The gap between the gross and net columns is the finding: a battery pays for its own wear
+on every cycle whether or not the trade was profitable, so an imperfect forecast loses
+margin twice, once in the trade and again in the wear spent chasing it.
+
+**How big that gap is depends almost entirely on the wear price, which makes this a
+weaker claim than it first appears.** At the field-anchored £12.1/MWh the gross-to-net
+capture ratio is 1.24; at £20.3/MWh it is 1.60. An earlier, incorrect wear price of
+£30.6/MWh put it at 2.5, which was dramatic and wrong. The mechanism is real and its
+direction is not in doubt, but anyone quoting a magnitude has to quote the c_deg with it.
 
 ![transmission](figures/transmission.png)
 
-Cutting MAE by a quarter, from £20.1 to £15.1/MWh, triples net capture from 21 % to 61 %;
-the remaining three quarters of the improvement buy the last 39 points. On an error axis
-the transmission looks strongly non-linear — and that reading does not survive changing
-the axis.
+Cutting MAE by a quarter, from £20.1 to £15.1/MWh, lifts net capture from 48 % to 75 %.
+On an error axis the transmission looks non-linear — and that reading does not survive
+changing the axis.
 
 The sweep is generated by blending the model's forecast toward the realised price, which
 lowers MAE and injects oracle *ordering* at the same time. A battery earns on the
 ordering. Both axes are therefore reported:
 
-| | capture 21 → 61 % | 61 → 84 % | 84 → 96 % | 96 → 100 % |
+| | capture 48 → 75 % | 75 → 88 % | 88 → 97 % | 97 → 100 % |
 |---|---|---|---|---|
-| slope per £1/MWh of MAE removed | 7.9 | 4.5 | 2.4 | 0.8 |
-| slope per unit of rank correlation | 256 | 222 | 183 | 175 |
+| slope per £1/MWh of MAE removed | 5.2 | 2.7 | 1.7 | 0.6 |
+| slope per unit of rank correlation | 167 | 134 | 132 | 133 |
 
-Across the whole sweep the slope varies about tenfold on the error axis and 1.5-fold on
-the ordering axis. The £15.1 MAE point carries a within-day rank correlation of 0.81,
-while both genuine forecasters sit at 0.58–0.65. **So the non-linearity is largely a
-property of the axis, not of forecasting**, and the load-bearing result in this finding is
-the gross-versus-net gap in the table above, which needs no skill axis at all. A sweep over
-genuinely different forecasters would settle what real skill improvement buys; it has not
-been run.
+The slope varies about ninefold on the error axis and 1.3-fold on the ordering axis — on
+the axis a battery actually earns against, the relationship is close to a straight line.
+**So the non-linearity is a property of the axis, not of forecasting**, and the
+load-bearing result here is the gross-versus-net gap above, which needs no skill axis at
+all. A sweep over genuinely different forecasters would settle what real skill
+improvement buys; it has not been run.
 
-*Scope*: this applies to a strategy priced off the half-hourly reference price, which
-is not known in advance. It does not apply to day-ahead auction arbitrage, where the
-clearing price is known at gate closure and perfect foresight is close to achievable
-for that leg. The forecast-dependent part of a real revenue stack is within-day and
-balancing.
+*Scope*: this applies to a strategy priced off the half-hourly reference price, which is
+not known in advance. It does not apply to day-ahead auction arbitrage, where the clearing
+price is known at gate closure and perfect foresight is close to achievable for that leg.
+The forecast-dependent part of a real revenue stack is within-day and balancing.
 
 **4. The two errors hiding inside a flat efficiency assumption have opposite signs. For
 a 2-hour battery they very nearly cancel, and everything that survives is the auxiliary
@@ -191,24 +193,25 @@ each isolating one omission (H1 2025, thermal load 0 to 0.2 MW):
 
 | arm | net revenue (£) | |
 |---|---|---|
-| conventional: flat 0.9, no auxiliary draw | 1,783,084 | what a typical model prints |
-| the same schedule, paying auxiliaries | 1,428,406–1,675,113 | costs £108k–£355k |
-| the same schedule, also settled on the real curve | 1,544,269–1,790,975 | *gains* £116k back |
-| optimised with the curve inside the program | 1,619,074–1,865,781 | a further 4.2–4.8 % |
+| conventional: flat 0.9, no auxiliary draw | 2,934,034 | what a typical model prints |
+| the same schedule, paying auxiliaries | 2,481,519–2,728,226 | costs £206k–£453k |
+| the same schedule, also settled on the real curve | 2,774,620–3,021,326 | *gains* £293k back |
+| optimised with the curve inside the program | 2,901,092–3,147,798 | a further 4.2–4.6 % |
 
 | thermal load | 0 MW | 0.05 MW | 0.10 MW | 0.20 MW |
 |---|---|---|---|---|
-| conventional model overstated by | **−0.4 %** | 3.1 % | 6.9 % | 15.5 % |
-| of which: auxiliary consumption | +£107,972 | +£169,648 | +£231,325 | +£354,678 |
-| of which: efficiency curve shape | −£115,863 | −£115,863 | −£115,863 | −£115,863 |
+| conventional model overstated by | **−2.9 %** | −0.9 % | 1.2 % | 5.7 % |
+| of which: auxiliary consumption | +£205,809 | +£267,485 | +£329,162 | +£452,515 |
+| of which: efficiency curve shape | −£293,101 | −£293,101 | −£293,101 | −£293,101 |
 
 ![efficiency error](figures/efficiency_error.png)
 
-With no standing thermal load the conventional model is 0.4 % *low*, not high: the
+With no standing thermal load the conventional model is 2.9 % *low*, not high: the
 efficiency it gets wrong is wrong in the generous direction, and that gain slightly
 exceeds the no-load draw it ignores. Every pound of net overstatement therefore traces
-to the standing auxiliary load, and grows roughly linearly with it. Putting the curve
-inside the optimiser is worth 4.2–4.8 % and does shift dispatch, from 86.2 % to 90.2 %
+to the standing auxiliary load, and only at 0.10 MW of it does the conventional number
+turn positive at all. Putting the curve
+inside the optimiser is worth 4.2–4.6 % and does shift dispatch, from 85.6 % to 89.5 %
 of rated discharge load, because an auxiliary-excluded curve rises monotonically toward
 rated power rather than peaking mid-load.
 
@@ -222,8 +225,8 @@ rated, so most of the 85→65 fall is a near-constant auxiliary draw integrated 
 times the exposure — a time integral, not part-load electronics, and not something that
 belongs in a power-indexed curve.
 
-**5. Pricing wear by service decides whether the battery enters the reserve market at
-all — not just what it books.**
+**5. Pricing wear by service is worth 5–8 % of net revenue and cuts cycling 6–9 %, but at
+this wear price it does not decide whether the battery enters the reserve market.**
 
 Module tests under real grid duty profiles put peak-shifting ageing at 1.81–1.92×
 frequency regulation at comparable throughput (Xu et al. 2025, 220 Ah LFP). The sign is
@@ -237,28 +240,23 @@ distinction, rather than one degradation cost for all energy:
 
 | reserve price (£/MW/h) | mean reserve held, one cost | with 1.85× ratio | cycling | net |
 |---|---|---|---|---|
-| 2 | 0.00 MW | 25.03 MW | −5.9 % | +6.2 % |
-| 5 | 39.53 MW | 43.43 MW | −18.7 % | +33.9 % |
-| 10 | 46.98 MW | 47.50 MW | −11.6 % | +16.8 % |
+| 2 | 20.28 MW | 26.52 MW | −8.6 % | +6.8 % |
+| 5 | 39.20 MW | 40.41 MW | −6.1 % | +7.6 % |
+| 10 | 45.45 MW | 45.80 MW | −5.8 % | +5.0 % |
 
 ![service-differentiated wear](figures/service_cdeg.png)
 
-At £2/MW/h the single-cost model declines the reserve market outright — it holds no
-reserve at all, because one degradation cost makes the availability payment look
-uneconomic. The differentiated model commits 25 MW, because reserve duty is gentler on
-the cells than arbitrage duty. That is a binary difference in whether the asset
-participates, which no percentage change captures. Where both models participate the
-capacity shift is modest, but cycling falls 6–19 % and net revenue rises 6–34 %
-throughout.
+The effect is real but modest: reserve holdings rise 0.3–6.2 MW, cycling falls 6–9 %, net
+revenue rises 5–8 %. The value comes less from holding more reserve than from doing the
+same work with less wear charged against it.
 
-**The threshold matters more than the headline.** Sweeping the ratio from 1.0 to 2.5
-shows the market-entry flip happens between 1.5 and 1.85: at 1.5 the differentiated model
-holds no reserve either, byte for byte identical to the single-cost model. That is
-uncomfortable, because 1.5 is what the lifetime study implies and 1.85 is what the
-throughput-normalised module test implies. **The flip therefore sits inside the range the
-two corroborating studies span, not safely beyond it** — so the defensible claim is that
-service differentiation *can* decide participation at plausible parameter values, not that
-it does.
+**An earlier version of this finding claimed something stronger — that the distinction
+decides whether the asset enters the reserve market at all — and that claim depended
+entirely on an incorrect wear price.** At £30.6/MWh the single-cost model declined the
+reserve market outright at £2/MW/h; at the corrected £12.1/MWh it holds 20.3 MW there.
+Participation can still flip, but only when wear is expensive enough to make reserve
+marginal under a single cost, so it is a statement about a parameter regime rather than
+about the mechanism.
 
 This finding also rests on the weakest assumption in the project, stated in the code:
 mapping a capacity-loss ratio onto a marginal-cost ratio presumes damage accumulates
@@ -269,18 +267,28 @@ synthetic constant used in finding 2.
 
 ## What is different here
 
-**Degradation level comes from the field as a pair, shape comes from the cell.** Public
-cell-level ageing models (NREL BLAST-Lite, parameterised on Naumann et al. and on NREL's
-own large-format prismatic tests) predict 5–7 %/yr capacity loss at 300 equivalent full
-cycles, against measured whole-system loss of 1.4–3 %/yr. Running them unscaled prices
-degradation above realistic spreads and silently shuts off all trading, so the cell model
-supplies the *response* to depth, rate and temperature while field evidence supplies the
-*level*. The anchoring needs both a loss rate and the cycling that produced it, which
-only one public case reports: the Italian plant's 119 EFC/yr at 1.37 %/yr. Anchoring
-instead to the model's own cycling — a fixed point in EFC — was considered and rejected,
-because it assumes this asset cycles at the same rate as the field systems, which is
-exactly what is unknown; that choice moves c_deg from £30.6 to £10.9/MWh, so it is stated
-rather than buried.
+**Degradation is a power law, anchored to a field case, and charged at the margin.** Both
+ageing terms in the cell model are power laws in their driver — calendar in time, cycling
+in throughput — with exponents below one. Applying them matters more than any parameter
+choice here: read as linear rates the same model predicts 67 % capacity loss over the
+field plant's first three years against 4.1 % measured, and it was that apparent
+sixteenfold over-prediction which made aggressive field anchoring look mandatory. With the
+exponents applied the model lands within 20 % of a system it was never fitted to, so the
+anchor is a 0.82 correction rather than a rescue.
+
+The anchor scales calendar and cycle ageing *together* to reproduce the field plant's
+measured loss over its own life — 356 equivalent full cycles across three years to 95.9 %
+state of health. Charging that whole loss per cycle, as an earlier version did by dividing
+a total loss by a cycle-only model term, prices calendar fade as though trading caused it.
+It does not: a battery ages on the shelf, so calendar fade is a cost of ownership and only
+the cycle term belongs in a cost per MWh.
+
+Because the cycle exponent is below one, **c_deg is not a constant** — the marginal wear
+of one more cycle falls from about £15.4/MWh at 250 cumulative cycles to £10.0 at 3000.
+The £12.1 used throughout is that curve at 1000 cycles, roughly mid-life for this asset,
+and the implied cycle life of 4,740 to 80 % capacity is inside what large-format LFP is
+warranted for — which is the sanity check that first exposed the missing exponents, since
+reading them as linear rates implied 911.
 
 **Auxiliary consumption is separated by where it actually arises, and kept out of the
 efficiency curve.** The load-independent loss inside the AC round-trip curve (0.69 MW,
@@ -339,7 +347,7 @@ On the individual layers:
 | Jafari, Botterud & Sakti (2020), Applied Energy 276, 115417 | simplified battery representations overstate offshore wind-storage revenue by ~35 % | GB standalone asset on 2024–2025 data; overstatement split into attributable layers rather than one total |
 | Falezza (2026), arXiv:2604.12082 | forecast skill maps non-linearly to revenue; Kendall τ, not MAE, is the decision-relevant axis; persistence captures 32.8 % of oracle | see the reconciliation below |
 | Humiston, Cetin & de Queiroz (2026), Energies 19(4) 1056 | linear-calendar and energy-throughput ageing give ≈2 %/yr and modest economic impact; rainflow gives much higher loss, large negative valuation, and is highly sensitive to calibration | that calibration sensitivity is the failure mode field anchoring here is built to avoid; their design deliberately holds dispatch fixed, whereas dispatch response is the object of study here |
-| Cornejo et al. (2025), ISGT Europe, doi:10.1109/ISGTEurope64741.2025.11305340 | putting a non-linear equivalent-circuit loss model inside an MPC is worth 0.4 / 1.9 / 3.8 % at internal-resistance multipliers of 1 / 2 / 3 | the comparable fresh-asset figure there is 0.4 %, against 4.2–4.8 % here; the gap is the calibration basis, not the mechanism (see Status). Those three percentages are read from the preprint and have not been checked against the published version |
+| Cornejo et al. (2025), ISGT Europe, doi:10.1109/ISGTEurope64741.2025.11305340 | putting a non-linear equivalent-circuit loss model inside an MPC is worth 0.4 / 1.9 / 3.8 % at internal-resistance multipliers of 1 / 2 / 3 | the comparable fresh-asset figure there is 0.4 %, against 4.2–4.6 % here; the gap is the calibration basis, not the mechanism (see Status). Those three percentages are read from the preprint and have not been checked against the published version |
 | Gatta et al. (2015), IEEE PowerTech, doi:10.1109/PTC.2015.7232464 | auxiliary loads are "usually disregarded in studies concerning BESS integration" | supplies the prevalence evidence for finding 4 rather than asserting it |
 | Schimpe et al. (2018), Applied Energy 210, 211–229 | 18 loss mechanisms in a container system; power-electronic losses exceed cell losses at low operating power | the mechanism behind the curve shape used here |
 | Gale et al. (2026), J. Energy Storage 166, 122328 | GB balancing-market access is worth £166,123/MW/yr against £47,234/MW/yr for wholesale alone — but the first figure assumes unconstrained BM access, and the paper notes real batteries skip over 90 % of instructions and that a commercial GB battery earned £101k/MW/yr from all sources in 2023; revenue falls about £12,000/MW/yr per 10 points of skip rate | the sharpest disagreement in this table, and the best prevalence evidence for finding 1: it prices wear at £0.50/MWh and argues explicitly that "the insensitivity of results to our economic proxy for degradation lends support to not needing to model degradation" — a 2026, GB, open-access paper taking the exact shortcut finding 1 measures, at 1/61 of the cost used here. Its wholesale-only figure is also the closest published like-for-like revenue comparison, used as such below |
@@ -388,8 +396,8 @@ rather than asserted. Every figure here is normalised to £/MW/yr for the same
 |---|---|---|
 | this project, degradation ignored, perfect foresight | 45,295 | wholesale arbitrage only |
 | **Gale et al. (2026), modelled, wholesale only, 100 MW / 1 h, June 2020 – June 2023** | **47,234** | wholesale arbitrage only, marginal cost £0.5/MWh |
-| this project, field-anchored degradation, perfect foresight | 19,370 | wholesale arbitrage only |
-| this project, degradation + out-of-sample forecast | 4,142 | wholesale arbitrage only |
+| this project, field-anchored degradation, perfect foresight | 31,873 | wholesale arbitrage only |
+| this project, degradation + out-of-sample forecast | 15,442 | wholesale arbitrage only |
 | Modo Energy, realised, typical 2 h GB BESS, 12 months to Apr 2026 — wholesale + balancing only | 43,829 | 60 % of that fleet's stack |
 | Modo Energy, same asset and period, **full stack** | 73,145 | + Capacity Market (7,454) + ancillary (33 % gross) |
 | Gale et al. citing Modo: a real commercial GB battery, all sources, Jan–Aug 2023 | ~101,000 | full stack |
@@ -406,15 +414,15 @@ honest reading is *the same order of magnitude, with the duration correction unr
 **What the comparison does establish is that the apparent order-of-magnitude discrepancy
 against full-stack indices is not a modelling error.** It is the deductions this project
 measures plus the markets it excludes. Reading down the table: pricing wear at the
-field-anchored £30.56/MWh cuts the figure by 57 %, and replacing foresight with a real
-out-of-sample forecast removes four fifths of what is left. Neither step is present in any
+field-anchored £12.09/MWh cuts the figure by 30 %, and replacing foresight with a real
+out-of-sample forecast removes half of what is left. Neither step is present in any
 published index.
 
 What is excluded is as important. This asset trades one price series. It does not touch
 the Balancing Mechanism, holds no ancillary contracts, and earns no Capacity Market
 derating payment — the last of which alone is £7,454/MW/yr in the Modo breakdown.
 Consistent with that, `v1` shows a single reserve stream at £5–10/MW/h lifting net revenue
-to £40k–£81k/MW/yr, which brackets the £73k full-stack benchmark.
+to £55k–£93k/MW/yr, which brackets the £73k full-stack benchmark.
 
 Two limits on how far this can be pushed. Modo's index methodology sits behind a login,
 so whether it is gross or net of degradation cannot be established — it therefore cannot
@@ -514,7 +522,7 @@ The standing thermal draw has no absolute field anchor here, only an order of ma
 because the source plant never publishes its auxiliaries' nominal rating. It is swept.
 
 The comparison to Cornejo et al. (2025) is not like-for-like. Their fresh-asset figure
-for putting a non-linear loss model inside the optimiser is 0.4 %, against 4.2–4.8 %
+for putting a non-linear loss model inside the optimiser is 0.4 %, against 4.2–4.6 %
 here. The mechanism is the same but the baselines differ: their reference is an already
 load-dependent linear model on a 180 kW asset in the German intraday market, whereas the
 reference here is a flat 0.9 that misprices the high-load band a 2-hour GB asset actually

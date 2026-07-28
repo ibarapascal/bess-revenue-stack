@@ -5,7 +5,7 @@
   ],
   "battery": "50 MW / 100 MWh (2 h)",
   "market": "GB wholesale (Elexon MID/APXMIDP)",
-  "c_deg_arbitrage": 30.56,
+  "c_deg_arbitrage": 12.09,
   "forecast_skill": {
     "persistence": {
       "mae": 21.1788282414307,
@@ -25,20 +25,20 @@
     }
   },
   "capture_net_pct": {
-    "persistence": 8.2,
-    "gbm": 21.4
+    "persistence": 38.4,
+    "gbm": 48.4
   },
-  "capture_gross_pct_gbm": 52.7,
-  "finding": "forecasting the half-hourly reference price captures 53% of perfect-foresight gross margin but only 21% of net revenue: degradation cost is incurred on every cycle whether or not the trade was right, so it amplifies forecast error rather than scaling with it. The naive same-period-yesterday baseline captures 8% net.",
+  "capture_gross_pct_gbm": 60.1,
+  "finding": "forecasting the half-hourly reference price captures 60% of perfect-foresight gross margin but only 48% of net revenue: degradation cost is incurred on every cycle whether or not the trade was right, so it amplifies forecast error rather than scaling with it. The naive same-period-yesterday baseline captures 38% net.",
   "scope_note": "This applies to a strategy priced off the half-hourly reference/imbalance price, which is not known in advance. It does not apply to day-ahead auction arbitrage, where the clearing price is known at gate closure and the perfect-foresight figure is close to achievable for that leg. The forecast-dependent part of a real revenue stack is within-day and balancing, not the day-ahead auction.",
   "headline_factor_band": [
     {
       "scenario": "Italian field pair",
-      "c_deg": 30.56,
-      "pf_gross_GBP": 3145765,
-      "gbm_net_GBP": 380743,
-      "overstatement_factor": 8.26,
-      "capture_net_pct": 21.4
+      "c_deg": 12.09,
+      "pf_gross_GBP": 3932212,
+      "gbm_net_GBP": 1419433,
+      "overstatement_factor": 2.77,
+      "capture_net_pct": 48.4
     },
     {
       "scenario": "EPRI 2.3 %/yr, EFC assumed 300",
@@ -54,35 +54,35 @@
     {
       "arm": "perfect foresight",
       "mae": 0.0,
-      "gross_GBP": 3145765,
-      "deg_cost_GBP": 1364736,
-      "net_GBP": 1781029,
-      "GBP_per_MW_yr": 19376,
+      "gross_GBP": 3932212,
+      "deg_cost_GBP": 1001812,
+      "net_GBP": 2930400,
+      "GBP_per_MW_yr": 31881,
       "capture_gross_pct": 100.0,
       "capture_net_pct": 100.0,
-      "efc_per_year": 243.0
+      "efc_per_year": 450.8
     },
     {
       "arm": "persistence",
       "mae": 21.18,
-      "gross_GBP": 1508628,
-      "deg_cost_GBP": 1362989,
-      "net_GBP": 145640,
-      "GBP_per_MW_yr": 1584,
-      "capture_gross_pct": 48.0,
-      "capture_net_pct": 8.2,
-      "efc_per_year": 242.6
+      "gross_GBP": 2128241,
+      "deg_cost_GBP": 1001812,
+      "net_GBP": 1126430,
+      "GBP_per_MW_yr": 12255,
+      "capture_gross_pct": 54.1,
+      "capture_net_pct": 38.4,
+      "efc_per_year": 450.8
     },
     {
       "arm": "gbm",
       "mae": 20.07,
-      "gross_GBP": 1656585,
-      "deg_cost_GBP": 1275842,
-      "net_GBP": 380743,
-      "GBP_per_MW_yr": 4142,
-      "capture_gross_pct": 52.7,
-      "capture_net_pct": 21.4,
-      "efc_per_year": 227.1
+      "gross_GBP": 2365021,
+      "deg_cost_GBP": 945588,
+      "net_GBP": 1419433,
+      "GBP_per_MW_yr": 15442,
+      "capture_gross_pct": 60.1,
+      "capture_net_pct": 48.4,
+      "efc_per_year": 425.5
     }
   ],
   "transmission": [
@@ -91,36 +91,36 @@
       "mae": 20.07,
       "within_day_rank_corr": 0.653,
       "direction_accuracy": 0.613,
-      "capture_net_pct": 21.4,
-      "capture_gross_pct": 52.7,
-      "net_GBP": 380743
+      "capture_net_pct": 48.4,
+      "capture_gross_pct": 60.1,
+      "net_GBP": 1419433
     },
     {
       "truth_weight": 0.25,
       "mae": 15.05,
       "within_day_rank_corr": 0.809,
       "direction_accuracy": 0.728,
-      "capture_net_pct": 61.3,
-      "capture_gross_pct": 74.3,
-      "net_GBP": 1092002
+      "capture_net_pct": 74.5,
+      "capture_gross_pct": 79.4,
+      "net_GBP": 2184550
     },
     {
       "truth_weight": 0.5,
       "mae": 10.04,
       "within_day_rank_corr": 0.911,
       "direction_accuracy": 0.824,
-      "capture_net_pct": 83.9,
-      "capture_gross_pct": 86.3,
-      "net_GBP": 1494134
+      "capture_net_pct": 88.2,
+      "capture_gross_pct": 89.9,
+      "net_GBP": 2585719
     },
     {
       "truth_weight": 0.75,
       "mae": 5.02,
       "within_day_rank_corr": 0.976,
       "direction_accuracy": 0.916,
-      "capture_net_pct": 95.8,
-      "capture_gross_pct": 94.2,
-      "net_GBP": 1706216
+      "capture_net_pct": 96.8,
+      "capture_gross_pct": 96.7,
+      "net_GBP": 2835912
     },
     {
       "truth_weight": 1.0,
@@ -129,7 +129,7 @@
       "direction_accuracy": 1.0,
       "capture_net_pct": 100.0,
       "capture_gross_pct": 100.0,
-      "net_GBP": 1781029
+      "net_GBP": 2930400
     }
   ]
 }
