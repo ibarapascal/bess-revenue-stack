@@ -143,18 +143,31 @@ def main(start: str, end: str):
     # v0 uses are carried through here rather than left implied.
     print("\nheadline sensitivity to the degradation price")
     band = []
+    # The second point is the highest wear price a field case supports: the German
+    # systems' upper 3 %/yr sustained over their eight-year observation window. It is
+    # derived here from the same anchoring code as everything else, not hard-coded —
+    # an earlier version carried a number whose provenance had silently expired when
+    # the anchoring changed underneath it.
+    dc_hi = DegradationCost(cell_model="prismatic_250ah", field_annual_loss=0.03,
+                            field_efc_per_year=300.0, field_years=8.0)
     for label, c in (("Italian field pair", c_arb),
-                     ("EPRI 2.3 %/yr, EFC assumed 300", 20.30)):
+                     ("German upper 3 %/yr over 8-yr observation", dc_hi.cost("arbitrage"))):
         cfg_b = DispatchConfig(c_deg_arbitrage=c, allow_frequency=False)
         pf_b = backtest(base, batt, cfg_b, None)
         gb_b = backtest(base, batt, cfg_b, "fc_gbm")
+        cap_n = gb_b["revenue_net"] / pf_b["revenue_net"] * 100
+        cap_g = gb_b["revenue_energy"] / pf_b["revenue_energy"] * 100
         band.append({"scenario": label, "c_deg": round(c, 2),
                      "pf_gross_GBP": round(pf_b["revenue_energy"]),
+                     "gbm_gross_GBP": round(gb_b["revenue_energy"]),
                      "gbm_net_GBP": round(gb_b["revenue_net"]),
                      "overstatement_factor": round(pf_b["revenue_energy"] / gb_b["revenue_net"], 2),
-                     "capture_net_pct": round(gb_b["revenue_net"] / pf_b["revenue_net"] * 100, 1)})
+                     "capture_gross_pct": round(cap_g, 1),
+                     "capture_net_pct": round(cap_n, 1),
+                     "gross_to_net_capture_ratio": round(cap_g / cap_n, 2)})
         print(f"  c_deg {c:5.2f}  gross {pf_b['revenue_energy']:>11,.0f}  net {gb_b['revenue_net']:>10,.0f}"
-              f"  factor {band[-1]['overstatement_factor']:5.2f}x  capture {band[-1]['capture_net_pct']:4.1f}%")
+              f"  factor {band[-1]['overstatement_factor']:5.2f}x  capture {cap_g:4.1f}%/{cap_n:4.1f}%"
+              f"  ratio {band[-1]['gross_to_net_capture_ratio']:.2f}")
 
     res = pd.DataFrame(rows)
     res.to_csv(OUT / "v2_capture_rate.csv", index=False)

@@ -45,7 +45,7 @@ def fig_waterfall():
     ax.set_ylim(0, steps[0][1] * 1.15)
     ax.set_xticks(range(len(steps)))
     ax.set_xticklabels([s[0] for s in steps], fontsize=8)
-    ax.set_ylabel("£ over 2024–2025")
+    ax.set_ylabel("£ over the 22 months to Jan 2026")
     ax.set_title("What a perfect-foresight number hides\n50 MW / 100 MWh, GB wholesale",
                  fontsize=9.5)
     fig.tight_layout(); fig.savefig(FIG / "waterfall.png"); plt.close(fig)
@@ -99,7 +99,7 @@ def fig_degradation():
     ax.set_xticks(list(x))
     ax.set_xticklabels([s.replace(" field-anchored", "\nfield-anchored").replace(
         "no degradation cost", "ignored") for s in v0.scenario], fontsize=7.5)
-    ax.set_ylabel("net revenue over Q1 2025 (£k)")
+    ax.set_ylabel("net revenue, Mar 2024 – Jan 2026 (£k)")
     ax2.set_ylabel("equivalent full cycles / yr")
     ax.set_title("Pricing degradation changes revenue and behaviour", fontsize=9.5)
     h1, l1 = ax.get_legend_handles_labels(); h2, l2 = ax2.get_legend_handles_labels()
@@ -132,7 +132,7 @@ def fig_efficiency_error():
     ax.set_xticks(list(x))
     ax.set_xticklabels([f"{h:.2f}" for h in v3.hvac_MW])
     ax.set_xlabel("standing thermal load (MW)")
-    ax.set_ylabel("error in reported net revenue (£k, H1 2025)")
+    ax.set_ylabel("error in reported net revenue (£k, Mar 2024 – Jan 2026)")
     ax2.set_ylabel("net overstatement (%)")
     ax.set_title("A flat efficiency assumption errs in both directions at once\n"
                  "positive overstates revenue, negative understates it", fontsize=9.5)
@@ -143,7 +143,7 @@ def fig_efficiency_error():
 
 
 def fig_service_cdeg():
-    """Pricing wear by service decides market entry, not just bookkeeping."""
+    """What pricing wear by service changes about reserve participation."""
     v4 = pd.read_csv(RES / "v4_service_cdeg.csv")
     flat = v4[v4.ageing_ratio == 1.0].sort_values("fr_price")
     diff = v4[v4.ageing_ratio == 1.85].sort_values("fr_price")
@@ -153,16 +153,24 @@ def fig_service_cdeg():
            color="#8172b2", label="one degradation cost for all energy")
     ax.bar([i + 0.19 for i in x], diff.mean_reserve_MW, width=0.38,
            color="#dd8452", label="wear priced by service (1.85×)")
-    # the point of the chart: at the lowest price one model refuses the market outright
-    ax.annotate("declines the\nmarket entirely", xy=(-0.19, 0.4), xytext=(-0.30, 14),
-                fontsize=7.5, ha="center", color="#8172b2",
-                arrowprops=dict(arrowstyle="->", color="#8172b2", lw=0.8))
+    # Annotate the outright-refusal case only when the data actually shows one. This
+    # text was once unconditional, and after a recalibration moved the single-cost bar
+    # from 0.0 to 20.3 MW the figure kept asserting a refusal that no longer existed.
+    if float(flat.mean_reserve_MW.iloc[0]) < 0.5:
+        ax.annotate("declines the\nmarket entirely", xy=(-0.19, 0.4), xytext=(-0.30, 14),
+                    fontsize=7.5, ha="center", color="#8172b2",
+                    arrowprops=dict(arrowstyle="->", color="#8172b2", lw=0.8))
     ax.set_xticks(list(x))
     ax.set_xticklabels([f"£{p:.0f}" for p in flat.fr_price])
     ax.set_xlabel("reserve availability price (£/MW/h)")
     ax.set_ylabel("mean reserve held (MW of 50)")
+    # The title must not outrun the data: at the current wear price both models
+    # participate, and only at a high enough wear price does participation itself flip.
+    flips = float(flat.mean_reserve_MW.iloc[0]) < 0.5
     ax.set_title("Whether the battery enters the reserve market at all\n"
-                 "depends on how its wear is priced", fontsize=9.5)
+                 "depends on how its wear is priced" if flips else
+                 "Pricing reserve wear at its measured lower ageing\n"
+                 "shifts capacity toward reserve and cuts cycling", fontsize=9.5)
     ax.legend(fontsize=8, loc="upper left")
     fig.tight_layout(); fig.savefig(FIG / "service_cdeg.png"); plt.close(fig)
     print("figures/service_cdeg.png")

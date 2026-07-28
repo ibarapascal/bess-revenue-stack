@@ -12,3 +12,5 @@ end of life at 70 %,8.06
 end of life at 80 % (used),12.09
 cumulative cycles 250,15.34
 cumulative cycles 3000,10.01
+convention: equal share of replacement per cycle (constant),11.17
+"same, cycle budget net of calendar fade over the assumed life",14.26

@@ -279,6 +279,20 @@ class DegradationCost:
     # 3000. A single number has to name a point on that curve; 1000 EFC is roughly
     # mid-life for an asset cycling a few hundred times a year, and v0 sweeps it.
     #
+    # That declining shape is itself a convention, not a fact. It prices the capacity
+    # consumed by each cycle. The equally defensible alternative — natural when end of
+    # life is a threshold — prices every cycle as an equal share of the discounted
+    # replacement, which is *constant* over life: about 11.2 GBP/MWh here, or 14.3 once
+    # the calendar share of the usable window is netted out of the cycle budget. All
+    # three integrate to the same lifetime total and bracket the value used; v0 writes
+    # them into results/v0_cdeg_inputs.csv so the choice is visible, not buried.
+    #
+    # One more mismatch the anchor scale silently absorbs, alongside the chemistry gap:
+    # the reference operating point (dod 0.9, C-rate 0.5) is not the Italian plant's
+    # actual duty, which was shallow, slow PV-smoothing — below the prismatic model's
+    # own fitted dod range. The anchor is therefore a like-for-like match on *total
+    # loss*, not on operating conditions.
+    #
     # What the anchor does *not* do is make c_deg a measured quantity. It is
     #     replacement_cost * discount_factor * marginal_loss / usable / dod
     # and only the field pair inside marginal_loss is observed. The other inputs are

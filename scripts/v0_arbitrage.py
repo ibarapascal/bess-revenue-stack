@@ -43,16 +43,21 @@ def main(start: str, end: str):
     # Italian plant reports both (356 EFC over three years to 95.88 % SoH). The German
     # and EPRI cases give a rate without a cycle count, so they enter as sensitivity
     # under an assumed 300 EFC/yr and are labelled as such rather than as calibration.
-    scenarios = [(None, None, "no degradation cost"),
-                 (0.0137, 118.7, "Italian field pair, 1.37 %/yr at 119 EFC"),
-                 (0.023, 300.0, "EPRI 2.3 %/yr, EFC assumed 300"),
-                 (0.03, 300.0, "German upper 3 %/yr, EFC assumed 300")]
-    for loss, efc, label in scenarios:
+    # Each anchor case carries its observation duration, because with sub-linear
+    # ageing the duration is a real input, not bookkeeping: the same 3 %/yr sustained
+    # for eight years implies more damage than the model can produce in three, so the
+    # anchor scale — and c_deg — moves with it. The German systems were observed for
+    # eight years (doi:10.5281/zenodo.12091223); the EPRI duration is an assumption.
+    scenarios = [(None, None, None, "no degradation cost"),
+                 (0.0137, 118.7, 3.0, "Italian field pair, 1.37 %/yr at 119 EFC"),
+                 (0.023, 300.0, 3.0, "EPRI 2.3 %/yr, EFC and 3-yr duration assumed"),
+                 (0.03, 300.0, 8.0, "German upper 3 %/yr over its 8-yr observation, EFC assumed 300")]
+    for loss, efc, yrs, label in scenarios:
         if loss is None:
             c_deg = 0.0
         else:
             dc = DegradationCost(cell_model="prismatic_250ah", field_annual_loss=loss,
-                                 field_efc_per_year=efc)
+                                 field_efc_per_year=efc, field_years=yrs)
             c_deg = dc.cost("arbitrage")
         cfg = DispatchConfig(c_deg_arbitrage=c_deg, allow_frequency=False,
                              )
@@ -89,6 +94,24 @@ def main(start: str, end: str):
         inputs.append({"variant": name,
                        "c_deg": round(DegradationCost(cell_model="prismatic_250ah", **kw)
                                       .cost("arbitrage"), 2)}) 
+    # The marginal-capacity convention used throughout is itself a choice, so the main
+    # alternative is computed rather than argued. Pricing each cycle as an equal share
+    # of the discounted replacement — the natural convention when end of life is a
+    # threshold — gives a *constant* c_deg; netting the calendar share of the usable
+    # window out of the cycle budget raises it. All three integrate to the same total
+    # over the asset's life; they differ only in when the cost is charged.
+    d0 = DegradationCost(cell_model="prismatic_250ah")
+    disc = d0.replacement_cost_per_mwh / (1 + d0.discount_rate) ** d0.expected_life_years
+    m0 = d0._model()
+    n_eol = d0.implied_cycle_life()
+    inputs.append({"variant": "convention: equal share of replacement per cycle (constant)",
+                   "c_deg": round(disc / (n_eol * d0.REF_DOD), 2)})
+    cal_life = (d0.anchor_factor() * m0.calendar_rate(d0.REF_T_KELVIN, 0.5)
+                * (d0.expected_life_years * 365.25) ** m0.p_cal)
+    k_anch = d0.anchor_factor() * m0.cycle_rate(d0.REF_DOD, d0.REF_C_RATE, d0.REF_T_KELVIN)
+    n_eff = ((max((1 - d0.eol_fraction) - cal_life, 1e-6)) / k_anch) ** (1.0 / m0.p_cyc)
+    inputs.append({"variant": "same, cycle budget net of calendar fade over the assumed life",
+                   "c_deg": round(disc / (n_eff * d0.REF_DOD), 2)})
     pd.DataFrame(inputs).to_csv(OUT / "v0_cdeg_inputs.csv", index=False)
     lo = min(x["c_deg"] for x in inputs)
     hi = max(x["c_deg"] for x in inputs)

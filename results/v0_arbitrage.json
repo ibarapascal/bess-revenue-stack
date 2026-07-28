@@ -7,8 +7,8 @@
   "note": "perfect foresight \u2014 theoretical upper bound, not an achievable revenue",
   "degradation_cost_share_of_own_gross": {
     "Italian field pair, 1.37 %/yr at 119 EFC": 25.5,
-    "EPRI 2.3 %/yr, EFC assumed 300": 25.7,
-    "German upper 3 %/yr, EFC assumed 300": 30.9
+    "EPRI 2.3 %/yr, EFC and 3-yr duration assumed": 25.7,
+    "German upper 3 %/yr over its 8-yr observation, EFC assumed 300": 35.5
   },
   "cdeg_input_sensitivity": [
     {
@@ -62,13 +62,21 @@
     {
       "variant": "cumulative cycles 3000",
       "c_deg": 10.01
+    },
+    {
+      "variant": "convention: equal share of replacement per cycle (constant)",
+      "c_deg": 11.17
+    },
+    {
+      "variant": "same, cycle budget net of calendar fade over the assumed life",
+      "c_deg": 14.26
     }
   ],
   "cdeg_input_note": "three of the four inputs to the wear price are conventions without a cited source; only the field loss-per-cycle pair is observed. The spread below is how much of every finding here rests on those conventions",
   "efc_reduction_vs_no_cost": {
     "Italian field pair, 1.37 %/yr at 119 EFC": 38.2,
-    "EPRI 2.3 %/yr, EFC assumed 300": 38.5,
-    "German upper 3 %/yr, EFC assumed 300": 45.2
+    "EPRI 2.3 %/yr, EFC and 3-yr duration assumed": 38.5,
+    "German upper 3 %/yr over its 8-yr observation, EFC assumed 300": 52.6
   },
   "table": [
     {
@@ -92,7 +100,7 @@
       "GBP_per_MW_year": 31873
     },
     {
-      "scenario": "EPRI 2.3 %/yr, EFC assumed 300",
+      "scenario": "EPRI 2.3 %/yr, EFC and 3-yr duration assumed",
       "assumed_efc_per_year": 300.0,
       "c_deg": 12.23,
       "gross_energy_GBP": 3932738,
@@ -102,14 +110,14 @@
       "GBP_per_MW_year": 31743
     },
     {
-      "scenario": "German upper 3 %/yr, EFC assumed 300",
+      "scenario": "German upper 3 %/yr over its 8-yr observation, EFC assumed 300",
       "assumed_efc_per_year": 300.0,
-      "c_deg": 15.96,
-      "gross_energy_GBP": 3805544,
-      "deg_cost_GBP": 1174352,
-      "net_GBP": 2631192,
-      "efc_per_year": 399.8,
-      "GBP_per_MW_year": 28583
+      "c_deg": 20.23,
+      "gross_energy_GBP": 3625357,
+      "deg_cost_GBP": 1287105,
+      "net_GBP": 2338253,
+      "efc_per_year": 345.6,
+      "GBP_per_MW_year": 25401
     }
   ]
 }

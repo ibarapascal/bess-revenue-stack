@@ -10,7 +10,7 @@ March 2024 to January 2026, every finding on the same asset and the same window.
 
 | # | shortcut | what it costs | the catch |
 |---|---|---|---|
-| 1 | pricing wear at zero | overstates net revenue **42–59 %**, and implies 729 full cycles a year against 451 | the wear price is a four-input calculation and only one input is measured |
+| 1 | pricing wear at zero | overstates net revenue **42–78 %**, and implies 729 full cycles a year against 346–451 | the wear price is a four-input calculation and only one input is measured |
 | 2 | no state-of-charge headroom for reserve | overstates **3–15 %** — at £2/MW/h it commits 40.1 MW of reserve against 26.5 MW it could deliver | reserve prices here are a synthetic sweep, not market data |
 | 3 | assuming you can forecast | a real forecast captures **60 % of gross margin but only 48 % of net** | the gap is real but modest; it widens as the wear price rises, so it is a claim about degradation-aware models, not about forecasting |
 | 4 | one flat round-trip efficiency | **the two errors inside it have opposite signs and mostly cancel** — with no thermal load the flat assumption is 2.9 % *low*, and what overstatement remains (to 5.7 %) is entirely the auxiliary load | holds for a 2-hour asset discharging at 86 % of rated; a longer-duration asset may flip it |
@@ -31,10 +31,11 @@ a **wholesale-only strategy indexed to the half-hourly reference price** — a r
 battery also trades the day-ahead auction, where the clearing price is known at gate
 closure and forecast error costs far less, so £0.38m is the achievable revenue of the
 forecast-dependent leg, not of the asset. And the size of the gap is set by how wear is
-priced: **2.8× at the field-anchored £12.1/MWh, 4.1× at £20.3/MWh**. A factor of three to
-four, with the degradation price as the dominant input, is the honest headline. The top bar
-is itself the gross margin of a schedule that already prices degradation; a model ignoring
-wear entirely would cycle 729 times a year and print £4.17m.
+priced: **2.8× at the field-anchored £12.1/MWh, 4.1× at the £20.2/MWh implied by the
+German systems' eight-year record**. A factor of three to four, with the degradation price
+as the dominant input, is the honest headline. The top bar is itself the gross margin of a
+schedule that already prices degradation; a model ignoring wear entirely would cycle 729
+times a year and print £4.17m.
 
 This is a controlled experiment on one asset in one market, not a survey. The shortcuts
 are shown to be *costly* here and shown to be *common* by citation — see How this relates
@@ -48,15 +49,16 @@ wider spreads, so choosing a quarter per finding would let each effect be report
 most flattering. Doing the opposite turned out to strengthen the results rather than
 soften them.
 
-**1. Ignoring degradation cost overstates arbitrage revenue by 42–59 % and implies
+**1. Ignoring degradation cost overstates arbitrage revenue by 42–78 % and implies
 cycling no owner would accept.**
 
 A degradation cost cannot be set from an annual loss rate alone: the same 2 %/yr means
-a very different cost per MWh depending on how hard the asset was cycled to get there.
-Only one public field case reports both — an Italian utility-scale plant, 356
-equivalent full cycles over three years to 95.9 % state of health, so 119 EFC/yr at
-1.37 %/yr. The other field cases give a rate without a cycle count and enter as
-sensitivity under an assumed 300 EFC/yr, labelled as such rather than as calibration.
+a very different cost per MWh depending on how hard the asset was cycled to get there —
+and, with sub-linear ageing, on how long the rate was observed. Only one public field
+case reports the full triple — an Italian utility-scale plant, 356 equivalent full cycles
+over three years to 95.9 % state of health, so 119 EFC/yr at 1.37 %/yr. The other field
+cases enter as sensitivity under an assumed 300 EFC/yr, with their observation windows
+carried where the source states one, and are labelled as such rather than as calibration.
 
 **What "field-anchored" does and does not mean.** At the reference operating point the
 cost reduces to a closed form in four inputs — replacement cost, discount factor, the
@@ -80,17 +82,23 @@ it would move every magnitude here toward the smaller end.
 | degradation assumption | c_deg (£/MWh) | net revenue (£) | £/MW/yr | cycles/yr |
 |---|---|---|---|---|
 | ignored, as in many public models | 0 | 4,169,625 | 45,295 | 729 |
-| Italian field pair (1.37 %/yr at 119 EFC) | 12.1 | 2,934,034 | 31,873 | 451 |
-| EPRI 2.3 %/yr, EFC assumed 300 | 12.2 | 2,922,049 | 31,743 | 449 |
-| German upper 3 %/yr, EFC assumed 300 | 16.0 | 2,631,192 | 28,583 | 400 |
+| Italian field pair (1.37 %/yr at 119 EFC, 3 yr) | 12.1 | 2,934,034 | 31,873 | 451 |
+| EPRI 2.3 %/yr — EFC and 3-yr duration assumed | 12.2 | 2,922,049 | 31,743 | 449 |
+| German upper 3 %/yr over its 8-yr observation — EFC assumed | 20.2 | 2,338,253 | 25,401 | 346 |
 
 ![degradation](figures/degradation.png)
 
 729 equivalent full cycles per year is two a day, every day, for two years. Pricing the
-wear cuts cycling by 38–45 % and removes 42–59 % of the revenue. Note how little the three
-rows now differ: once the anchor scales calendar and cycle ageing together, two field cases
-with very different headline loss rates imply almost the same marginal cost per cycle.
-The spread between published field degradation rates matters far less than it appears to.
+wear cuts cycling by 38–53 % and removes 42–78 % of the revenue.
+
+Two things about that table are easy to miss. The Italian and EPRI rows land within
+pennies of each other despite headline loss rates of 1.37 and 2.3 %/yr — once the anchor
+scales calendar and cycle ageing together, the published *rate* matters far less than it
+appears to. What does matter, now that ageing is sub-linear, is the **observation
+duration**: the German row is higher not because its rate is higher but because 3 %/yr
+sustained for eight years is more damage than the model can produce in three, so the
+anchor must scale it up. An earlier version used a three-year default for every row,
+which understated the German case by a quarter.
 
 **2. Omitting the state-of-charge headroom constraint overstates net revenue by
 3–15 %, by selling reserve the battery could not have delivered.**
@@ -113,8 +121,8 @@ availability.
 | 10 | 8,552,049 | 9,266,521 | 8.4 % | 45.8 → 44.4 |
 | 20 | 16,203,677 | 16,681,857 | 3.0 % | 48.4 → 47.1 |
 
-The clearest case is £2/MW/h, where the model without the constraint commits nearly twice
-the reserve it can back with energy — 40.1 MW against a deliverable 26.5 MW. The revenue
+The clearest case is £2/MW/h, where the model without the constraint commits half as much
+reserve again as it can back with energy — 40.1 MW against a deliverable 26.5 MW. The revenue
 error is largest at £2–5, where the battery must genuinely choose between markets, and at £10–20 availability pays so well that both arms saturate; the two rows where
 adding the constraint slightly *raises* mean reserve are a rescheduling effect, not a
 solver artefact — the constrained problem shifts when it charges in order to keep
@@ -143,9 +151,10 @@ margin twice, once in the trade and again in the wear spent chasing it.
 
 **How big that gap is depends almost entirely on the wear price, which makes this a
 weaker claim than it first appears.** At the field-anchored £12.1/MWh the gross-to-net
-capture ratio is 1.24; at £20.3/MWh it is 1.60. An earlier, incorrect wear price of
-£30.6/MWh put it at 2.5, which was dramatic and wrong. The mechanism is real and its
-direction is not in doubt, but anyone quoting a magnitude has to quote the c_deg with it.
+capture ratio is 1.24; at the German-record £20.2/MWh it is 1.54 (both computed, in
+`results/v2_cdeg_band.csv`). An earlier, incorrect wear price of £30.6/MWh put it at 2.5,
+which was dramatic and wrong. The mechanism is real and its direction is not in doubt,
+but anyone quoting a magnitude has to quote the c_deg with it.
 
 ![transmission](figures/transmission.png)
 
@@ -283,12 +292,18 @@ a total loss by a cycle-only model term, prices calendar fade as though trading 
 It does not: a battery ages on the shelf, so calendar fade is a cost of ownership and only
 the cycle term belongs in a cost per MWh.
 
-Because the cycle exponent is below one, **c_deg is not a constant** — the marginal wear
-of one more cycle falls from about £15.4/MWh at 250 cumulative cycles to £10.0 at 3000.
-The £12.1 used throughout is that curve at 1000 cycles, roughly mid-life for this asset,
-and the implied cycle life of 4,740 to 80 % capacity is inside what large-format LFP is
-warranted for — which is the sanity check that first exposed the missing exponents, since
-reading them as linear rates implied 911.
+Because the cycle exponent is below one, the marginal wear of one more cycle falls over
+life — from about £15.4/MWh at 250 cumulative cycles to £10.0 at 3000 — and the £12.1 used
+throughout is that curve at 1000 cycles, roughly mid-life for this asset. **The declining
+shape is a convention, not a fact.** It prices the capacity each cycle consumes; the
+equally defensible alternative, natural when end of life is a threshold, prices every
+cycle as an equal share of the discounted replacement and is *constant*: £11.2/MWh here,
+or £14.3 once calendar fade's share of the usable window is netted out of the cycle
+budget. All three integrate to the same lifetime total, all three sit within a few pounds
+of each other, and `results/v0_cdeg_inputs.csv` carries them side by side. The implied
+cycle life of 4,740 to 80 % capacity is inside what large-format LFP is warranted for —
+the sanity check that first exposed the missing exponents, since reading them as linear
+rates implied 911.
 
 **Auxiliary consumption is separated by where it actually arises, and kept out of the
 efficiency curve.** The load-independent loss inside the AC round-trip curve (0.69 MW,
@@ -350,11 +365,11 @@ On the individual layers:
 | Cornejo et al. (2025), ISGT Europe, doi:10.1109/ISGTEurope64741.2025.11305340 | putting a non-linear equivalent-circuit loss model inside an MPC is worth 0.4 / 1.9 / 3.8 % at internal-resistance multipliers of 1 / 2 / 3 | verified against the paper's own Figure 2 and Table II; SOH_R is an internal-resistance multiplier, so 1.0 is a fresh cell and 3.0 a second-life one. The comparable fresh-asset figure is 0.4 %, against 4.2–4.6 % here — the gap is the calibration basis, not the mechanism (see Status) |
 | Gatta et al. (2015), IEEE PowerTech, doi:10.1109/PTC.2015.7232464 | auxiliary loads are "usually disregarded in studies concerning BESS integration" | supplies the prevalence evidence for finding 4 rather than asserting it |
 | Schimpe et al. (2018), Applied Energy 210, 211–229 | 18 loss mechanisms in a container system; power-electronic losses exceed cell losses at low operating power | the mechanism behind the curve shape used here |
-| Gale et al. (2026), J. Energy Storage 166, 122328 | GB balancing-market access is worth £166,123/MW/yr against £47,234/MW/yr for wholesale alone — but the first figure assumes unconstrained BM access, and the paper notes real batteries skip over 90 % of instructions and that a commercial GB battery earned £101k/MW/yr from all sources in 2023; revenue falls about £12,000/MW/yr per 10 points of skip rate | the sharpest disagreement in this table, and the best prevalence evidence for finding 1: it prices wear at £0.50/MWh and argues explicitly that "the insensitivity of results to our economic proxy for degradation lends support to not needing to model degradation" — a 2026, GB, open-access paper taking the exact shortcut finding 1 measures, at 1/61 of the cost used here. Its wholesale-only figure is also the closest published like-for-like revenue comparison, used as such below |
+| Gale et al. (2026), J. Energy Storage 166, 122328 | GB balancing-market access is worth £166,123/MW/yr against £47,234/MW/yr for wholesale alone — but the first figure assumes unconstrained BM access, and the paper notes real batteries skip over 90 % of instructions and that a commercial GB battery earned £101k/MW/yr from all sources in 2023; revenue falls about £12,000/MW/yr per 10 points of skip rate | the sharpest disagreement in this table, and the best prevalence evidence for finding 1: it prices wear at £0.50/MWh and argues explicitly that "the insensitivity of results to our economic proxy for degradation lends support to not needing to model degradation" — a 2026, GB, open-access paper taking the exact shortcut finding 1 measures, at 1/24 of the cost used here. Its wholesale-only figure is also the closest published like-for-like revenue comparison, used as such below |
 | Vykhodtsev et al. (2022), Renewable and Sustainable Energy Reviews 166, 112584 | taxonomy of battery models used in techno-economic analysis | classifies the modelling choices without quantifying what they cost, which is the gap addressed here |
 
 **Reconciling finding 3 with Falezza (2026).** That paper reports near-complete capture
-at high forecast skill; the LightGBM arm here captures 21 % of net revenue. The numbers
+at high forecast skill; the LightGBM arm here captures 48 % of net revenue. The numbers
 are not in conflict because they measure different assets in different markets: a
 10 MW / 10 MWh unit across FCR, aFRR, day-ahead and intraday in DE/CH, where the reserve
 capacity payments do not depend on a price forecast at all, against a 50 MW / 100 MWh
@@ -484,11 +499,11 @@ with an 11.6× difference return identical costs is visible only by evaluating b
 
 ```bash
 pip install -r requirements.txt
-PYTHONPATH=src python3 scripts/v0_arbitrage.py        2025-01-01 2025-03-31
-PYTHONPATH=src python3 scripts/v1_reserve_headroom.py 2025-01-01 2025-03-31
+PYTHONPATH=src python3 scripts/v0_arbitrage.py        2024-03-01 2026-01-01
+PYTHONPATH=src python3 scripts/v1_reserve_headroom.py 2024-03-01 2026-01-01
 PYTHONPATH=src python3 scripts/v2_capture_rate.py     2024-01-01 2025-12-31
-PYTHONPATH=src python3 scripts/v3_converter_efficiency.py       2025-01-01 2025-06-30
-PYTHONPATH=src python3 scripts/v4_service_differentiated_cdeg.py 2025-01-01 2025-06-30
+PYTHONPATH=src python3 scripts/v3_converter_efficiency.py        2024-03-01 2026-01-01
+PYTHONPATH=src python3 scripts/v4_service_differentiated_cdeg.py 2024-03-01 2026-01-01
 PYTHONPATH=src python3 scripts/verify.py
 PYTHONPATH=src python3 scripts/make_figures.py
 ```
