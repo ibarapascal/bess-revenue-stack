@@ -1,0 +1,106 @@
+{
+  "window": [
+    "2024-03-01",
+    "2026-01-01"
+  ],
+  "battery": "50 MW / 100 MWh (2 h)",
+  "market": "GB wholesale (Elexon MID/APXMIDP)",
+  "c_deg_arbitrage": 17.65,
+  "forecast_skill": {
+    "persistence": {
+      "mae": 21.1788282414307,
+      "rmse": 39.327114854110334,
+      "bias": -0.014313214108296075,
+      "direction_accuracy": 0.6081286676809389,
+      "within_day_rank_corr_median": 0.579438745900557,
+      "n": 32208
+    },
+    "gbm": {
+      "mae": 20.070431579399983,
+      "rmse": 33.26605568537187,
+      "bias": -0.24473886945844908,
+      "direction_accuracy": 0.613220728413078,
+      "within_day_rank_corr_median": 0.6533868866695614,
+      "n": 32208
+    }
+  },
+  "capture_net_pct": {
+    "persistence": 25.7,
+    "gbm": 33.8
+  },
+  "capture_gross_pct_gbm": 54.6,
+  "finding": "forecasting the half-hourly reference price captures 55% of perfect-foresight gross margin but only 34% of net revenue: degradation cost is incurred on every cycle whether or not the trade was right, so it amplifies forecast error rather than scaling with it. The naive same-period-yesterday baseline captures 26% net.",
+  "scope_note": "This applies to a strategy priced off the half-hourly reference/imbalance price, which is not known in advance. It does not apply to day-ahead auction arbitrage, where the clearing price is known at gate closure and the perfect-foresight figure is close to achievable for that leg. The forecast-dependent part of a real revenue stack is within-day and balancing, not the day-ahead auction.",
+  "arms": [
+    {
+      "arm": "perfect foresight",
+      "mae": 0.0,
+      "gross_GBP": 3555848,
+      "deg_cost_GBP": 1275376,
+      "net_GBP": 2280472,
+      "GBP_per_MW_yr": 24810,
+      "capture_gross_pct": 100.0,
+      "capture_net_pct": 100.0,
+      "efc_per_year": 393.1
+    },
+    {
+      "arm": "persistence",
+      "mae": 21.18,
+      "gross_GBP": 1859624,
+      "deg_cost_GBP": 1274181,
+      "net_GBP": 585443,
+      "GBP_per_MW_yr": 6369,
+      "capture_gross_pct": 52.3,
+      "capture_net_pct": 25.7,
+      "efc_per_year": 392.7
+    },
+    {
+      "arm": "gbm",
+      "mae": 20.07,
+      "gross_GBP": 1941444,
+      "deg_cost_GBP": 1170003,
+      "net_GBP": 771441,
+      "GBP_per_MW_yr": 8393,
+      "capture_gross_pct": 54.6,
+      "capture_net_pct": 33.8,
+      "efc_per_year": 360.6
+    }
+  ],
+  "transmission": [
+    {
+      "truth_weight": 0.0,
+      "mae": 20.07,
+      "capture_net_pct": 33.8,
+      "capture_gross_pct": 54.6,
+      "net_GBP": 771441
+    },
+    {
+      "truth_weight": 0.25,
+      "mae": 15.05,
+      "capture_net_pct": 69.0,
+      "capture_gross_pct": 77.5,
+      "net_GBP": 1573985
+    },
+    {
+      "truth_weight": 0.5,
+      "mae": 10.04,
+      "capture_net_pct": 85.9,
+      "capture_gross_pct": 88.5,
+      "net_GBP": 1959890
+    },
+    {
+      "truth_weight": 0.75,
+      "mae": 5.02,
+      "capture_net_pct": 96.5,
+      "capture_gross_pct": 96.1,
+      "net_GBP": 2200527
+    },
+    {
+      "truth_weight": 1.0,
+      "mae": 0.0,
+      "capture_net_pct": 100.0,
+      "capture_gross_pct": 100.0,
+      "net_GBP": 2280472
+    }
+  ]
+}
