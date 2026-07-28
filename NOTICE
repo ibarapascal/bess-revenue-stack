@@ -1,0 +1,64 @@
+Third-party attributions
+========================
+
+This project is licensed under the MIT License (see LICENSE). It incorporates
+material from the projects below, whose own licence terms continue to apply to
+that material.
+
+--------------------------------------------------------------------------------
+NREL BLAST-Lite  (https://github.com/NREL/BLAST-Lite)
+--------------------------------------------------------------------------------
+
+`src/bess/degradation/blast_lfp.py` implements the semi-empirical LFP degradation
+models `sony_murata_3ah` and `prismatic_250ah` using parameter values taken from
+BLAST-Lite. The implementation here is independent, but the fitted coefficients
+are BLAST-Lite's and are redistributed under its licence, reproduced in full:
+
+Copyright (c) 2023, Alliance for Energy Innovation, LLC
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+The underlying cell measurements are due to Naumann et al.
+(doi:10.1016/j.est.2018.01.019, doi:10.1016/j.jpowsour.2019.227666) and Gasper
+et al. (doi:10.1016/j.est.2023.109042); BLAST-Lite refitted them. Cite those
+papers for the data and BLAST-Lite for the fit.
+
+--------------------------------------------------------------------------------
+Elexon market data
+--------------------------------------------------------------------------------
+
+`src/bess/data/elexon.py` retrieves GB wholesale and imbalance prices from the
+Elexon Insights / BMRS endpoints. No data obtained from Elexon is redistributed
+in this repository — the local cache is excluded by .gitignore, and every run
+fetches its own copy.
+
+Elexon's terms of use are not reproduced here because they could not be
+retrieved at the time of writing, so no licence is asserted on their behalf.
+Anyone redistributing data obtained through this client, or using it
+commercially, should read Elexon's current terms first. What is verified here is
+narrower and stated as such in the README: the endpoints used are publicly
+reachable and require no API key.

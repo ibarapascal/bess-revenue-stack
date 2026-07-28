@@ -301,9 +301,11 @@ degradation physics is known to violate, and is flagged in the code rather than
 buried.
 
 **No API keys, no manual downloads.** The Elexon Insights endpoints used here are
-open (verified 2026-07-28); existing Python wrappers for them are unmaintained, so
-the client is self-contained and caches to parquet. One command reproduces every
-number above from nothing.
+publicly reachable and need no key or registration (verified 2026-07-28); existing
+Python wrappers for them are unmaintained, so the client is self-contained and caches to
+parquet. One command reproduces every number above from nothing. No Elexon data is
+redistributed here — the cache is git-ignored and each run fetches its own copy — and
+Elexon's terms of use are not asserted in this repository; see NOTICE.
 
 ## How this relates to published work
 
@@ -551,7 +553,8 @@ Journal.
 published work for the full list, headed by Mohamed, Rigo-Mariani & Debusschere (2025),
 doi:10.1016/j.est.2025.117998.
 
-**Market data.** Elexon Insights (open, no API key).
+**Market data.** Elexon Insights / BMRS (no API key required). Third-party licence
+terms, including the BSD-3-Clause notice for the degradation parameters, are in NOTICE.
 
 Every reference above was checked against Crossref or publisher metadata rather than
 carried over from memory; where only an abstract could be read, the section that cites it
