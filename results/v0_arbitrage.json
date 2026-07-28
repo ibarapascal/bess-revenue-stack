@@ -10,6 +10,61 @@
     "EPRI 2.3 %/yr, EFC assumed 300": 25.7,
     "German upper 3 %/yr, EFC assumed 300": 30.9
   },
+  "cdeg_input_sensitivity": [
+    {
+      "variant": "replacement cost 80k/MWh",
+      "c_deg": 8.06
+    },
+    {
+      "variant": "replacement cost 120k/MWh (used)",
+      "c_deg": 12.09
+    },
+    {
+      "variant": "replacement cost 160k/MWh",
+      "c_deg": 16.12
+    },
+    {
+      "variant": "discount rate 0 %",
+      "c_deg": 30.44
+    },
+    {
+      "variant": "discount rate 8 % (used)",
+      "c_deg": 12.09
+    },
+    {
+      "variant": "discount rate 12 %",
+      "c_deg": 7.81
+    },
+    {
+      "variant": "life 8 yr",
+      "c_deg": 16.45
+    },
+    {
+      "variant": "life 12 yr (used)",
+      "c_deg": 12.09
+    },
+    {
+      "variant": "life 15 yr",
+      "c_deg": 9.6
+    },
+    {
+      "variant": "end of life at 70 %",
+      "c_deg": 8.06
+    },
+    {
+      "variant": "end of life at 80 % (used)",
+      "c_deg": 12.09
+    },
+    {
+      "variant": "cumulative cycles 250",
+      "c_deg": 15.34
+    },
+    {
+      "variant": "cumulative cycles 3000",
+      "c_deg": 10.01
+    }
+  ],
+  "cdeg_input_note": "three of the four inputs to the wear price are conventions without a cited source; only the field loss-per-cycle pair is observed. The spread below is how much of every finding here rests on those conventions",
   "efc_reduction_vs_no_cost": {
     "Italian field pair, 1.37 %/yr at 119 EFC": 38.2,
     "EPRI 2.3 %/yr, EFC assumed 300": 38.5,

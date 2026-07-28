@@ -4,7 +4,8 @@ Semi-empirical LFP degradation, parameterised from NREL BLAST-Lite.
 Two cell models are implemented because they disagree, and the disagreement is
 itself part of the answer:
 
-  sony_murata_3ah   Sony/Murata LFP-Gr 3 Ah cylindrical, fitted by NREL to the
+  sony_murata_3ah   Partial implementation, cycling term only — see its docstring.
+                    Sony/Murata LFP-Gr 3 Ah cylindrical, fitted by NREL to the
                     data of Naumann et al. (J. Energy Storage 17, 2018,
                     doi:10.1016/j.est.2018.01.019; J. Power Sources 451, 2020,
                     doi:10.1016/j.jpowsour.2019.227666). Wide DoD coverage.
@@ -55,7 +56,17 @@ def _ua_from_soc(soc):
 
 @dataclass
 class SonyMurata3Ah:
-    """BLAST-Lite lfp_gr_SonyMurata3Ah_2018."""
+    """BLAST-Lite lfp_gr_SonyMurata3Ah_2018 — a *partial* implementation.
+
+    Upstream sums three capacity-loss states: calendar, cycling, and an early-life
+    break-in term. Only the cycling term is implemented here. The calendar term is a
+    sigmoid state update whose rate constant cannot be multiplied by time (see
+    calendar_rate), and the break-in term is absent. Coefficients that are present were
+    checked against upstream digit by digit; what is missing is whole terms, not wrong
+    numbers. This model is therefore usable for comparing cycling response between
+    chemistries and is not usable for total loss or for field anchoring — which
+    cumulative_loss enforces by raising.
+    """
     name: str = "sony_murata_3ah"
     dod_valid: tuple = (0.0, 1.0)
 

@@ -67,6 +67,34 @@ def main(start: str, end: str):
               f"  net={r['revenue_net']:>10,.0f}  EFC/yr={r['efc']/r['days']*365:6.1f}"
               f"  {r['revenue_per_mw_year']:>8,.0f} GBP/MW/yr")
 
+    # The wear price rests on four inputs and only one of them — the field loss/cycle
+    # pair — is an observation. The other three are conventions this project could not
+    # source: no public cost reference was reachable to cite. Rather than leave that in
+    # prose, the sensitivity is written out as a result, so anyone can see how much of
+    # any finding here is a convention rather than a measurement.
+    inputs = []
+    for name, kw in (("replacement cost 80k/MWh", {"replacement_cost_per_mwh": 80_000.0}),
+                     ("replacement cost 120k/MWh (used)", {}),
+                     ("replacement cost 160k/MWh", {"replacement_cost_per_mwh": 160_000.0}),
+                     ("discount rate 0 %", {"discount_rate": 0.0}),
+                     ("discount rate 8 % (used)", {}),
+                     ("discount rate 12 %", {"discount_rate": 0.12}),
+                     ("life 8 yr", {"expected_life_years": 8.0}),
+                     ("life 12 yr (used)", {}),
+                     ("life 15 yr", {"expected_life_years": 15.0}),
+                     ("end of life at 70 %", {"eol_fraction": 0.7}),
+                     ("end of life at 80 % (used)", {}),
+                     ("cumulative cycles 250", {"reference_cycles": 250.0}),
+                     ("cumulative cycles 3000", {"reference_cycles": 3000.0})):
+        inputs.append({"variant": name,
+                       "c_deg": round(DegradationCost(cell_model="prismatic_250ah", **kw)
+                                      .cost("arbitrage"), 2)}) 
+    pd.DataFrame(inputs).to_csv(OUT / "v0_cdeg_inputs.csv", index=False)
+    lo = min(x["c_deg"] for x in inputs)
+    hi = max(x["c_deg"] for x in inputs)
+    print(f"\nc_deg across unsourced conventions: {lo:.2f} to {hi:.2f} GBP/MWh "
+          f"(used {DegradationCost(cell_model='prismatic_250ah').cost('arbitrage'):.2f})")
+
     res = pd.DataFrame(rows)
     res.to_csv(OUT / "v0_arbitrage.csv", index=False)
 
@@ -79,6 +107,11 @@ def main(start: str, end: str):
         "degradation_cost_share_of_own_gross": {
             r.scenario: round(r.deg_cost_GBP / r.gross_energy_GBP * 100, 1)
             for _, r in res.iloc[1:].iterrows()},
+        "cdeg_input_sensitivity": inputs,
+        "cdeg_input_note": ("three of the four inputs to the wear price are conventions "
+                            "without a cited source; only the field loss-per-cycle pair is "
+                            "observed. The spread below is how much of every finding here "
+                            "rests on those conventions"),
         "efc_reduction_vs_no_cost": {
             r.scenario: round((1 - r.efc_per_year / base.efc_per_year) * 100, 1)
             for _, r in res.iloc[1:].iterrows()},

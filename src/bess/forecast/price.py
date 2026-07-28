@@ -13,6 +13,17 @@ Leakage discipline, enforced structurally rather than by care:
     forecast origin
   - realised prices are used only for settlement, never inside the optimiser
 
+One limit of that discipline is worth stating because it is not obvious. Each forecast
+is day-ahead: the features for period t use prices up to t minus one day. That is
+self-consistent for the forecast itself, but the backtest optimises over a 48-hour
+window, and the forecasts for the second half of that window were built from prices
+that had not yet occurred when the window began. Only the first half is executed, so
+the contamination sits in the horizon padding rather than in the decisions themselves,
+but it is a look-ahead and it is measured rather than assumed small — see the note in
+the README. Removing it properly needs a genuine multi-horizon forecaster, in which the
+forecast for every period in the window is conditioned only on data available when the
+window opens; that has not been built.
+
 Two forecasters are provided so that the revenue effect can be attributed to
 forecast skill rather than to the presence of a forecaster:
   persistence  — yesterday's price at the same settlement period. The naive
@@ -84,9 +95,14 @@ class Forecaster:
             train = d.iloc[:origin].dropna(subset=FEATURES + [self.price_col])
             if len(train) < 500:
                 continue
+            # `subsample` is deliberately absent: LightGBM ignores it unless
+            # `subsample_freq` is also set, and `verbose=-1` hides the warning, so
+            # passing it declared a behaviour the model never had. Setting both would
+            # change every number in v2, so the parameter is dropped rather than
+            # quietly enabled.
             model = lgb.LGBMRegressor(
                 n_estimators=400, learning_rate=0.05, num_leaves=31,
-                min_child_samples=30, subsample=0.9, colsample_bytree=0.9,
+                min_child_samples=30, colsample_bytree=0.9,
                 verbose=-1, random_state=42)
             model.fit(train[FEATURES], train[self.price_col])
             stop = min(origin + step, n)

@@ -347,7 +347,7 @@ On the individual layers:
 | Jafari, Botterud & Sakti (2020), Applied Energy 276, 115417 | simplified battery representations overstate offshore wind-storage revenue by ~35 % | GB standalone asset on 2024–2025 data; overstatement split into attributable layers rather than one total |
 | Falezza (2026), arXiv:2604.12082 | forecast skill maps non-linearly to revenue; Kendall τ, not MAE, is the decision-relevant axis; persistence captures 32.8 % of oracle | see the reconciliation below |
 | Humiston, Cetin & de Queiroz (2026), Energies 19(4) 1056 | linear-calendar and energy-throughput ageing give ≈2 %/yr and modest economic impact; rainflow gives much higher loss, large negative valuation, and is highly sensitive to calibration | that calibration sensitivity is the failure mode field anchoring here is built to avoid; their design deliberately holds dispatch fixed, whereas dispatch response is the object of study here |
-| Cornejo et al. (2025), ISGT Europe, doi:10.1109/ISGTEurope64741.2025.11305340 | putting a non-linear equivalent-circuit loss model inside an MPC is worth 0.4 / 1.9 / 3.8 % at internal-resistance multipliers of 1 / 2 / 3 | the comparable fresh-asset figure there is 0.4 %, against 4.2–4.6 % here; the gap is the calibration basis, not the mechanism (see Status). Those three percentages are read from the preprint and have not been checked against the published version |
+| Cornejo et al. (2025), ISGT Europe, doi:10.1109/ISGTEurope64741.2025.11305340 | putting a non-linear equivalent-circuit loss model inside an MPC is worth 0.4 / 1.9 / 3.8 % at internal-resistance multipliers of 1 / 2 / 3 | verified against the paper's own Figure 2 and Table II; SOH_R is an internal-resistance multiplier, so 1.0 is a fresh cell and 3.0 a second-life one. The comparable fresh-asset figure is 0.4 %, against 4.2–4.6 % here — the gap is the calibration basis, not the mechanism (see Status) |
 | Gatta et al. (2015), IEEE PowerTech, doi:10.1109/PTC.2015.7232464 | auxiliary loads are "usually disregarded in studies concerning BESS integration" | supplies the prevalence evidence for finding 4 rather than asserting it |
 | Schimpe et al. (2018), Applied Energy 210, 211–229 | 18 loss mechanisms in a container system; power-electronic losses exceed cell losses at low operating power | the mechanism behind the curve shape used here |
 | Gale et al. (2026), J. Energy Storage 166, 122328 | GB balancing-market access is worth £166,123/MW/yr against £47,234/MW/yr for wholesale alone — but the first figure assumes unconstrained BM access, and the paper notes real batteries skip over 90 % of instructions and that a commercial GB battery earned £101k/MW/yr from all sources in 2023; revenue falls about £12,000/MW/yr per 10 points of skip rate | the sharpest disagreement in this table, and the best prevalence evidence for finding 1: it prices wear at £0.50/MWh and argues explicitly that "the insensitivity of results to our economic proxy for degradation lends support to not needing to model degradation" — a 2026, GB, open-access paper taking the exact shortcut finding 1 measures, at 1/61 of the cost used here. Its wholesale-only figure is also the closest published like-for-like revenue comparison, used as such below |
@@ -523,14 +523,34 @@ because the source plant never publishes its auxiliaries' nominal rating. It is 
 
 The comparison to Cornejo et al. (2025) is not like-for-like. Their fresh-asset figure
 for putting a non-linear loss model inside the optimiser is 0.4 %, against 4.2–4.6 %
-here. The mechanism is the same but the baselines differ: their reference is an already
-load-dependent linear model on a 180 kW asset in the German intraday market, whereas the
-reference here is a flat 0.9 that misprices the high-load band a 2-hour GB asset actually
-uses. The gap is the calibration basis, and it has not been reconciled experimentally.
+here. The mechanism is the same but the baselines differ: their linear reference already
+carries a load-dependent efficiency, whereas the reference here is a flat 0.9 that
+misprices the high-load band a 2-hour asset actually uses. Their paper also reports that
+a one-point loss of round-trip efficiency costs about 1.5 % of revenue (r = 0.998), which
+is the cleanest published statement of why this dimension is worth modelling at all. The
+gap between 0.4 % and 4.2 % is the calibration basis, and it has not been reconciled
+experimentally.
 
-Leakage discipline is structural, not by care: every forecast feature is a lag, the
-model is refit only on data strictly before each forecast origin, and realised prices
-enter settlement but never the optimiser.
+Leakage discipline is structural, not by care: every forecast feature is a lag, the model
+is refit only on data strictly before each forecast origin, and realised prices enter
+settlement but never the optimiser.
+
+One look-ahead survives that discipline and is worth naming because it is not obvious.
+Each forecast is day-ahead — features for period t use prices up to a day before t — but
+the optimiser works on a 48-hour window, so forecasts for the second half of a window were
+built from prices that had not occurred when the window opened. Only the first half is
+executed, so it sits in the horizon padding rather than in the decisions. It was measured
+rather than assumed harmless: shortening the window to remove the contaminated tail raises
+net capture from 48.4 % to 50.0 %, so the look-ahead is costing revenue rather than
+manufacturing it, and the headline is not flattered by it. Removing it properly needs a
+multi-horizon forecaster conditioned only on data available when the window opens, which
+has not been built.
+
+Three of the four inputs to the wear price are conventions this project could not source —
+no public cost reference was reachable to cite — so the sensitivity is written out as a
+result rather than described in prose. Across them c_deg spans £7.81 to £30.44/MWh against
+the £12.09 used (`results/v0_cdeg_inputs.csv`). Anyone weighing a finding here should read
+that file first: it is the honest width of every magnitude on this page.
 
 Not claimed: absolute revenue prediction for any real asset; prediction of any
 specific battery's capacity in year 10 (system-level degradation ground truth does

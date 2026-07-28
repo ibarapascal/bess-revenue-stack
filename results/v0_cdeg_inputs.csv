@@ -1,0 +1,14 @@
+variant,c_deg
+replacement cost 80k/MWh,8.06
+replacement cost 120k/MWh (used),12.09
+replacement cost 160k/MWh,16.12
+discount rate 0 %,30.44
+discount rate 8 % (used),12.09
+discount rate 12 %,7.81
+life 8 yr,16.45
+life 12 yr (used),12.09
+life 15 yr,9.6
+end of life at 70 %,8.06
+end of life at 80 % (used),12.09
+cumulative cycles 250,15.34
+cumulative cycles 3000,10.01
