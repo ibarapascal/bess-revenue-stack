@@ -39,7 +39,7 @@ def backtest(df, batt, cfg, forecast_col=None):
     if forecast_col:
         fc = df[["price"]].copy()
         fc["price"] = df[forecast_col].to_numpy()
-    return run_backtest(df, batt, cfg, window_periods=48, execute_periods=48, forecast=fc)
+    return run_backtest(df, batt, cfg, window_periods=96, execute_periods=48, forecast=fc)
 
 
 def main(start: str, end: str):
@@ -49,10 +49,10 @@ def main(start: str, end: str):
     raw = raw.dropna(subset=["price"]).reset_index(drop=True)
     print(f"raw periods={len(raw):,}  {raw.start_time.min().date()} .. {raw.start_time.max().date()}")
 
-    dc = DegradationCost(cell_model="prismatic_250ah", field_annual_loss=0.02)
+    dc = DegradationCost(cell_model="prismatic_250ah")   # Italian field pair
     c_arb = dc.cost("arbitrage")
     batt = Battery(power_mw=50, energy_mwh=100)
-    cfg = DispatchConfig(c_deg_arbitrage=c_arb, allow_frequency=False, terminal_soc_frac=0.5)
+    cfg = DispatchConfig(c_deg_arbitrage=c_arb, allow_frequency=False)
 
     rows, skills = [], {}
     frames = {}

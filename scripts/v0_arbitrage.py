@@ -38,22 +38,32 @@ def main(start: str, end: str):
 
     batt = Battery(power_mw=50, energy_mwh=100)
     rows = []
-    for loss in (None, 0.014, 0.02, 0.03):
+    # A loss rate alone cannot set c_deg: the same annual loss means a very different
+    # cost per MWh depending on how much the asset cycled to get there. Only the
+    # Italian plant reports both (356 EFC over three years to 95.88 % SoH). The German
+    # and EPRI cases give a rate without a cycle count, so they enter as sensitivity
+    # under an assumed 300 EFC/yr and are labelled as such rather than as calibration.
+    scenarios = [(None, None, "no degradation cost"),
+                 (0.0137, 118.7, "Italian field pair, 1.37 %/yr at 119 EFC"),
+                 (0.023, 300.0, "EPRI 2.3 %/yr, EFC assumed 300"),
+                 (0.03, 300.0, "German upper 3 %/yr, EFC assumed 300")]
+    for loss, efc, label in scenarios:
         if loss is None:
-            c_deg, label = 0.0, "no degradation cost"
+            c_deg = 0.0
         else:
-            dc = DegradationCost(cell_model="prismatic_250ah", field_annual_loss=loss)
-            c_deg, label = dc.cost("arbitrage"), f"{loss:.1%}/yr field-anchored"
+            dc = DegradationCost(cell_model="prismatic_250ah", field_annual_loss=loss,
+                                 field_efc_per_year=efc)
+            c_deg = dc.cost("arbitrage")
         cfg = DispatchConfig(c_deg_arbitrage=c_deg, allow_frequency=False,
-                             terminal_soc_frac=0.5)
-        r = run_backtest(df, batt, cfg, window_periods=48, execute_periods=48)
-        rows.append({"scenario": label, "c_deg": round(c_deg, 2),
+                             )
+        r = run_backtest(df, batt, cfg, window_periods=96, execute_periods=48)
+        rows.append({"scenario": label, "assumed_efc_per_year": efc, "c_deg": round(c_deg, 2),
                      "gross_energy_GBP": round(r["revenue_energy"]),
                      "deg_cost_GBP": round(r["cost_degradation"]),
                      "net_GBP": round(r["revenue_net"]),
                      "efc_per_year": round(r["efc"] / r["days"] * 365, 1),
                      "GBP_per_MW_year": round(r["revenue_per_mw_year"])})
-        print(f"  {label:26s} c_deg={c_deg:6.2f}  gross={r['revenue_energy']:>10,.0f}"
+        print(f"  {label:38s} c_deg={c_deg:6.2f}  gross={r['revenue_energy']:>10,.0f}"
               f"  net={r['revenue_net']:>10,.0f}  EFC/yr={r['efc']/r['days']*365:6.1f}"
               f"  {r['revenue_per_mw_year']:>8,.0f} GBP/MW/yr")
 

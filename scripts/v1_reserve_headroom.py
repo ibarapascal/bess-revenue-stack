@@ -41,7 +41,7 @@ def main(start: str, end: str):
     OUT.mkdir(exist_ok=True)
     df = load_prices(start, end).dropna(subset=["price"]).reset_index(drop=True)
 
-    dc = DegradationCost(cell_model="prismatic_250ah", field_annual_loss=0.02)
+    dc = DegradationCost(cell_model="prismatic_250ah")   # Italian field pair: 1.37 %/yr at 118.7 EFC/yr
     c_arb, c_fr = dc.cost("arbitrage"), dc.cost("frequency")
     print(f"periods={len(df):,}  c_deg arbitrage={c_arb:.2f}  frequency={c_fr:.2f} GBP/MWh")
     print(f"(frequency is cheaper per MWh moved: module tests put peak-shifting ageing at "
@@ -56,9 +56,9 @@ def main(start: str, end: str):
         for headroom in (True, False):
             cfg = DispatchConfig(c_deg_arbitrage=c_arb, c_deg_frequency=c_fr,
                                  allow_frequency=True, reserve_headroom=headroom,
-                                 terminal_soc_frac=0.5)
+                                 )
             r = run_backtest(df2, batt, cfg, fr_col="fr_price",
-                             window_periods=48, execute_periods=48)
+                             window_periods=96, execute_periods=48)
             out["with" if headroom else "without"] = r
         w, wo = out["with"], out["without"]
         overstate = (wo["revenue_net"] / w["revenue_net"] - 1) * 100 if w["revenue_net"] else np.nan

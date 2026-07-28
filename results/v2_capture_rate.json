@@ -5,7 +5,7 @@
   ],
   "battery": "50 MW / 100 MWh (2 h)",
   "market": "GB wholesale (Elexon MID/APXMIDP)",
-  "c_deg_arbitrage": 17.65,
+  "c_deg_arbitrage": 30.56,
   "forecast_skill": {
     "persistence": {
       "mae": 21.1788282414307,
@@ -25,82 +25,82 @@
     }
   },
   "capture_net_pct": {
-    "persistence": 25.7,
-    "gbm": 33.8
+    "persistence": 8.2,
+    "gbm": 21.4
   },
-  "capture_gross_pct_gbm": 54.6,
-  "finding": "forecasting the half-hourly reference price captures 55% of perfect-foresight gross margin but only 34% of net revenue: degradation cost is incurred on every cycle whether or not the trade was right, so it amplifies forecast error rather than scaling with it. The naive same-period-yesterday baseline captures 26% net.",
+  "capture_gross_pct_gbm": 52.7,
+  "finding": "forecasting the half-hourly reference price captures 53% of perfect-foresight gross margin but only 21% of net revenue: degradation cost is incurred on every cycle whether or not the trade was right, so it amplifies forecast error rather than scaling with it. The naive same-period-yesterday baseline captures 8% net.",
   "scope_note": "This applies to a strategy priced off the half-hourly reference/imbalance price, which is not known in advance. It does not apply to day-ahead auction arbitrage, where the clearing price is known at gate closure and the perfect-foresight figure is close to achievable for that leg. The forecast-dependent part of a real revenue stack is within-day and balancing, not the day-ahead auction.",
   "arms": [
     {
       "arm": "perfect foresight",
       "mae": 0.0,
-      "gross_GBP": 3555848,
-      "deg_cost_GBP": 1275376,
-      "net_GBP": 2280472,
-      "GBP_per_MW_yr": 24810,
+      "gross_GBP": 3145765,
+      "deg_cost_GBP": 1364736,
+      "net_GBP": 1781029,
+      "GBP_per_MW_yr": 19376,
       "capture_gross_pct": 100.0,
       "capture_net_pct": 100.0,
-      "efc_per_year": 393.1
+      "efc_per_year": 243.0
     },
     {
       "arm": "persistence",
       "mae": 21.18,
-      "gross_GBP": 1859624,
-      "deg_cost_GBP": 1274181,
-      "net_GBP": 585443,
-      "GBP_per_MW_yr": 6369,
-      "capture_gross_pct": 52.3,
-      "capture_net_pct": 25.7,
-      "efc_per_year": 392.7
+      "gross_GBP": 1508628,
+      "deg_cost_GBP": 1362989,
+      "net_GBP": 145640,
+      "GBP_per_MW_yr": 1584,
+      "capture_gross_pct": 48.0,
+      "capture_net_pct": 8.2,
+      "efc_per_year": 242.6
     },
     {
       "arm": "gbm",
       "mae": 20.07,
-      "gross_GBP": 1941444,
-      "deg_cost_GBP": 1170003,
-      "net_GBP": 771441,
-      "GBP_per_MW_yr": 8393,
-      "capture_gross_pct": 54.6,
-      "capture_net_pct": 33.8,
-      "efc_per_year": 360.6
+      "gross_GBP": 1656585,
+      "deg_cost_GBP": 1275842,
+      "net_GBP": 380743,
+      "GBP_per_MW_yr": 4142,
+      "capture_gross_pct": 52.7,
+      "capture_net_pct": 21.4,
+      "efc_per_year": 227.1
     }
   ],
   "transmission": [
     {
       "truth_weight": 0.0,
       "mae": 20.07,
-      "capture_net_pct": 33.8,
-      "capture_gross_pct": 54.6,
-      "net_GBP": 771441
+      "capture_net_pct": 21.4,
+      "capture_gross_pct": 52.7,
+      "net_GBP": 380743
     },
     {
       "truth_weight": 0.25,
       "mae": 15.05,
-      "capture_net_pct": 69.0,
-      "capture_gross_pct": 77.5,
-      "net_GBP": 1573985
+      "capture_net_pct": 61.3,
+      "capture_gross_pct": 74.3,
+      "net_GBP": 1092002
     },
     {
       "truth_weight": 0.5,
       "mae": 10.04,
-      "capture_net_pct": 85.9,
-      "capture_gross_pct": 88.5,
-      "net_GBP": 1959890
+      "capture_net_pct": 83.9,
+      "capture_gross_pct": 86.3,
+      "net_GBP": 1494134
     },
     {
       "truth_weight": 0.75,
       "mae": 5.02,
-      "capture_net_pct": 96.5,
-      "capture_gross_pct": 96.1,
-      "net_GBP": 2200527
+      "capture_net_pct": 95.8,
+      "capture_gross_pct": 94.2,
+      "net_GBP": 1706216
     },
     {
       "truth_weight": 1.0,
       "mae": 0.0,
       "capture_net_pct": 100.0,
       "capture_gross_pct": 100.0,
-      "net_GBP": 2280472
+      "net_GBP": 1781029
     }
   ]
 }

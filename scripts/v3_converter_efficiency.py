@@ -52,7 +52,7 @@ def main(start: str, end: str):
 
     batt = Battery(power_mw=50, energy_mwh=100)
     conv = ConverterModel(p_rated_mw=batt.power_mw)
-    dc = DegradationCost(cell_model="prismatic_250ah", field_annual_loss=0.02)
+    dc = DegradationCost(cell_model="prismatic_250ah")   # Italian field pair
     c_arb = dc.cost("arbitrage")
     days = len(df) * 0.5 / 24
 
@@ -73,8 +73,8 @@ def main(start: str, end: str):
     # the conventional arm is solved once: it knows nothing about auxiliaries or the
     # loss curve, so it does not depend on the sweep
     cfg_conv = DispatchConfig(c_deg_arbitrage=c_arb, allow_frequency=False,
-                              terminal_soc_frac=0.5)
-    conventional = run_backtest(df, batt, cfg_conv, window_periods=48, execute_periods=48)
+                              )
+    conventional = run_backtest(df, batt, cfg_conv, window_periods=96, execute_periods=48)
     sched = conventional["schedule"]
     aux_energy_price_sum = float(np.sum(prices[:len(sched)]) * 0.5)   # GBP per MW of standing draw
 
@@ -96,7 +96,7 @@ def main(start: str, end: str):
         cfg_aware = DispatchConfig(c_deg_arbitrage=c_arb, allow_frequency=False,
                                    terminal_soc_frac=0.5, converter=conv,
                                    aux_standing_mw=aux_mw)
-        aware = run_backtest(df, batt, cfg_aware, window_periods=48, execute_periods=48)
+        aware = run_backtest(df, batt, cfg_aware, window_periods=96, execute_periods=48)
         flat = conventional
 
         def pmy(x):
@@ -133,7 +133,7 @@ def main(start: str, end: str):
 
     res = pd.DataFrame(rows)
     res.to_csv(OUT / "v3_converter_efficiency.csv", index=False)
-    r0 = rows[0]
+    r0, rl = rows[0], rows[-1]
     summary = {
         "window": [start, end], "battery": "50 MW / 100 MWh (2 h)",
         "converter": {"calibration": "one-way 0.922 at rated, 0.806 at 10 % load "
@@ -141,18 +141,20 @@ def main(start: str, end: str):
                                      "utility-scale BESS, doi:10.1016/j.est.2023.107232",
                       "efficiency_by_load": dict(zip([f"{x:.0%}" for x in s["load_frac"]],
                                                      s["round_trip"]))},
-        "finding": (f"a conventional flat-efficiency model with no auxiliary load overstates net "
-                    f"arbitrage revenue by {r0['overstatement_pct']:.0f} % against the same "
-                    f"schedule settled with the converter's no-load loss while running and its "
-                    f"load-dependent "
-                    f"loss curve; {r0['share_of_gap_from_aux_pct']:.0f} % of that gap is the "
-                    f"auxiliary omission and the rest is the flat-efficiency assumption. Putting "
-                    f"the loss curve inside the optimiser recovers "
-                    f"{r0['recovered_by_modelling_pct']:.0f} % relative to the settled schedule, "
-                    f"by moving mean discharge load from "
-                    f"{r0['mean_discharge_load_frac_flat']:.0%} to "
-                    f"{r0['mean_discharge_load_frac_aware']:.0%} of rated power, toward the "
-                    f"efficiency peak near half load rather than toward maximum power"),
+        "finding": (
+            f"a conventional flat-efficiency model with no auxiliary load overstates net arbitrage "
+            f"revenue by {r0['overstatement_pct']:.0f} % with no thermal load at all and "
+            f"{rl['overstatement_pct']:.0f} % at {rl['hvac_MW']:.2f} MW of it. Between "
+            f"{r0['share_of_gap_from_aux_pct']:.0f} and {rl['share_of_gap_from_aux_pct']:.0f} % of "
+            f"that error is omitted auxiliary consumption; the shape of the efficiency curve is "
+            f"the small remainder. Putting the curve inside the optimiser recovers only "
+            f"{r0['recovered_by_modelling_pct']:.1f}-{rl['recovered_by_modelling_pct']:.1f} % and "
+            f"leaves dispatch essentially unchanged (mean discharge load "
+            f"{r0['mean_discharge_load_frac_flat']:.1%} against "
+            f"{r0['mean_discharge_load_frac_aware']:.1%} of rated power): once the no-load loss is "
+            f"charged per active period, running hard for fewer periods pays for itself, which "
+            f"cancels the pull toward the mid-load efficiency peak. The expensive omission is the "
+            f"auxiliary load, not the curve"),
         "table": rows,
     }
     (OUT / "v3_converter_efficiency.json").write_text(json.dumps(summary, indent=2))

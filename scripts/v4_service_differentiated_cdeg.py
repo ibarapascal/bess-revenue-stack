@@ -48,7 +48,7 @@ def main(start: str, end: str):
     batt = Battery(power_mw=50, energy_mwh=100)
     days = len(df) * 0.5 / 24
 
-    dc = DegradationCost(cell_model="prismatic_250ah", field_annual_loss=0.02)
+    dc = DegradationCost(cell_model="prismatic_250ah")   # Italian field pair
     c_ref = dc.cost("arbitrage")          # anchored reference, arbitrage duty
     print(f"periods={len(df):,}  reference c_deg = {c_ref:.2f} GBP/MWh")
 
@@ -61,9 +61,9 @@ def main(start: str, end: str):
             # reserve duty below arbitrage duty by the measured ageing ratio
             cfg = DispatchConfig(c_deg_arbitrage=c_ref, c_deg_frequency=c_ref / ratio,
                                  allow_frequency=True, reserve_headroom=True,
-                                 terminal_soc_frac=0.5)
+                                 )
             r = run_backtest(d2, batt, cfg, fr_col="fr_price",
-                             window_periods=48, execute_periods=48)
+                             window_periods=96, execute_periods=48)
             sched = r["schedule"]
             rows.append({
                 "fr_price": fr_price, "ageing_ratio": ratio,
@@ -97,7 +97,8 @@ def main(start: str, end: str):
         b = piv[(piv.fr_price == fr) & (piv.ageing_ratio == 1.85)].iloc[0]
         deltas.append({"fr_price": fr,
                        "reserve_MW_flat": a.mean_reserve_MW, "reserve_MW_diff": b.mean_reserve_MW,
-                       "reserve_change_pct": round((b.mean_reserve_MW / max(a.mean_reserve_MW, 1e-9) - 1) * 100, 1),
+                       "reserve_change_MW": round(b.mean_reserve_MW - a.mean_reserve_MW, 2),
+                       "enters_market_only_when_differentiated": bool(a.mean_reserve_MW < 0.01 and b.mean_reserve_MW > 1.0),
                        "efc_change_pct": round((b.efc_per_year / a.efc_per_year - 1) * 100, 1),
                        "net_change_pct": round((b.net_GBP / a.net_GBP - 1) * 100, 1)})
     summary = {
@@ -113,13 +114,19 @@ def main(start: str, end: str):
                    "that degradation physics is known to violate; the sweep over the ratio is "
                    "the sensitivity to that assumption"),
         "deltas_vs_flat": deltas,
-        "finding": (f"pricing reserve duty below arbitrage duty at the measured 1.85x ratio "
-                    f"shifts capacity toward the reserve market by "
-                    f"{min(d['reserve_change_pct'] for d in deltas):.0f}-"
-                    f"{max(d['reserve_change_pct'] for d in deltas):.0f} % and changes cycling by "
-                    f"{min(d['efc_change_pct'] for d in deltas):.0f}-"
-                    f"{max(d['efc_change_pct'] for d in deltas):.0f} %, so the distinction "
-                    f"changes behaviour and not only bookkeeping"),
+        "finding": (
+            "the distinction decides market participation, not just bookkeeping. At the lowest "
+            "reserve price tested the single-cost model declines the reserve market outright, "
+            f"holding {deltas[0]['reserve_MW_flat']:.2f} MW, while pricing reserve duty at the "
+            f"measured 1.85x lower ageing commits {deltas[0]['reserve_MW_diff']:.1f} MW to it — a "
+            "binary difference in whether the asset participates at all, which no percentage "
+            "captures. Where both models do participate the shift is smaller "
+            f"({min(d['reserve_change_MW'] for d in deltas[1:]):.1f} to "
+            f"{max(d['reserve_change_MW'] for d in deltas[1:]):.1f} MW), but cycling falls by "
+            f"{abs(max(d['efc_change_pct'] for d in deltas)):.0f}-"
+            f"{abs(min(d['efc_change_pct'] for d in deltas)):.0f} % and net revenue rises by "
+            f"{min(d['net_change_pct'] for d in deltas):.0f}-"
+            f"{max(d['net_change_pct'] for d in deltas):.0f} % throughout"),
         "table": rows,
     }
     (OUT / "v4_service_cdeg.json").write_text(json.dumps(summary, indent=2))

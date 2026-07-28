@@ -163,8 +163,20 @@ class DegradationCost:
     # (both give >5 %/yr at 300 EFC/yr against a 1.4-3 %/yr field range), so
     # running them unscaled would price degradation above realistic spreads and
     # silently suppress all trading.
-    field_annual_loss: float | None = 0.02        # None disables anchoring
-    field_efc_per_year: float = 300.0
+    field_annual_loss: float | None = 0.0137      # None disables anchoring
+    field_efc_per_year: float = 118.7
+    # Anchoring needs a *pair*: a loss rate is meaningless without the cycling that
+    # produced it. Only one public field case reports both — the Italian utility-scale
+    # plant, 356 equivalent full cycles over three years to 95.88 %% state of health,
+    # i.e. 118.7 EFC/yr at 1.37 %%/yr (doi:10.1016/j.est.2023.107232). The German and
+    # EPRI cases give a loss rate without a cycle count, so using them requires an
+    # assumed EFC and is treated as sensitivity rather than calibration.
+    #
+    # Making the anchor self-consistent with the model's own cycling (a fixed point
+    # in EFC) was considered and rejected: it would assume this asset cycles at the
+    # same rate as the field systems, which is precisely what is unknown. Iterating
+    # to that fixed point moves c_deg from 17.7 to 10.9 GBP/MWh, so the choice is not
+    # cosmetic and is stated rather than buried.
 
     def loss_per_efc(self, dod: float = 0.9, c_rate: float = 0.5, t_kelvin: float = 298.15) -> float:
         m = MODELS[self.cell_model]()

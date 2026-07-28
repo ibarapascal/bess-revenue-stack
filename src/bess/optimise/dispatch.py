@@ -193,6 +193,13 @@ def run_backtest(df: pd.DataFrame, battery: Battery, cfg: DispatchConfig,
                  execute_periods: int | None = None) -> dict:
     """Roll through the series window by window.
 
+    The horizon overlaps the execution period deliberately: optimising 48 hours and
+    executing 24 leaves the overnight trough inside the window, so the plan is not
+    truncated at midnight. An earlier version optimised and executed the same 24 hours
+    with the closing state of charge pinned at half, which cut cross-day arbitrage and
+    cost about 10 % of revenue — conservative, but it is not what "rolling horizon"
+    means.
+
     forecast is None            -> perfect foresight (theoretical upper bound)
     forecast supplied           -> optimise on forecast, settle on actuals, and
                                    only the first `execute_periods` of each window
