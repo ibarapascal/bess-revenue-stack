@@ -200,11 +200,21 @@ violate. Every check exists because something went wrong once:
 - no forecast feature at time t responds to a price at t or later, verified by
   perturbing a future price and confirming that no earlier feature row moves
 
-The suite earned its place immediately: it found that the convex loss relaxation was
-degenerate during negative prices, where the program could profit from overstating
-charging loss. Before the fix, finding 4 read "+30.3 %"; after it, "+13.3 %". A
-headline number was inflated by a factor of 2.3 by a bug that produced entirely
-plausible schedules and revenues.
+The suite earned its place immediately, and then a full review of the repository
+earned it twice over. Finding 4 has been through three values:
+
+| version | the efficiency curve was said to be worth | what was wrong |
+|---|---|---|
+| first | +30.3 % | the convex loss relaxation was degenerate during negative prices, where overstating charging loss lets the battery keep buying while capped |
+| after the suite caught that | +13.3 % | the converter's no-load loss was charged around the clock instead of only while running, and the conventional arm was charged for auxiliaries the convention it represents does not include |
+| current | +3.6–4.0 % | — |
+
+None of those intermediate versions failed to solve, and none produced an implausible
+schedule. Each was found by asking whether a quantity was the right *size*: an
+auxiliary consumption of a quarter of throughput against a field range of 1–3 % is
+what exposed the second error, not reading the code. Internal consistency is not
+evidence of physical correctness, and the direction of the finding changed once the
+sizes were right.
 
 ## Reproducing
 

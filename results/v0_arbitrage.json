@@ -5,10 +5,10 @@
   ],
   "battery": "50 MW / 100 MWh (2 h)",
   "note": "perfect foresight \u2014 theoretical upper bound, not an achievable revenue",
-  "degradation_cost_share_of_gross": {
-    "1.4%/yr field-anchored": 23.7,
-    "2.0%/yr field-anchored": 28.8,
-    "3.0%/yr field-anchored": 33.5
+  "degradation_cost_share_of_own_gross": {
+    "1.4%/yr field-anchored": 24.7,
+    "2.0%/yr field-anchored": 31.4,
+    "3.0%/yr field-anchored": 39.9
   },
   "efc_reduction_vs_no_cost": {
     "1.4%/yr field-anchored": 28.3,
