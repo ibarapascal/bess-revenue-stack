@@ -1,0 +1,72 @@
+{
+  "window": [
+    "2025-01-01",
+    "2025-06-30"
+  ],
+  "battery": "50 MW / 100 MWh (2 h)",
+  "converter": {
+    "calibration": "one-way 0.922 at rated, 0.806 at 10 % load (round trip 0.85 / 0.65), after field measurement of a utility-scale BESS, doi:10.1016/j.est.2023.107232",
+    "efficiency_by_load": {
+      "5%": 0.461,
+      "10%": 0.65,
+      "25%": 0.813,
+      "50%": 0.861,
+      "75%": 0.862,
+      "100%": 0.85
+    }
+  },
+  "finding": "a flat 0.9 round-trip efficiency overstates net arbitrage revenue by 8.5 % against the same schedule settled under a load-dependent converter model; putting the loss curve inside the optimiser recovers 30.3 % of that, by moving mean discharge load from 87% to 51% of rated power \u2014 toward the efficiency peak near half load rather than toward maximum power",
+  "table": [
+    {
+      "hvac_MW": 0.0,
+      "aux_standing_MW": 1.173,
+      "reported_net_GBP": 329209,
+      "actual_net_GBP": 303488,
+      "aware_net_GBP": 395438,
+      "overstatement_pct": 8.5,
+      "recovered_by_modelling_pct": 30.3,
+      "reported_GBP_per_MW_yr": 13276,
+      "actual_GBP_per_MW_yr": 12239,
+      "aware_GBP_per_MW_yr": 15947,
+      "delivered_fraction_of_flat_schedule": 0.988,
+      "efc_flat": 432.9,
+      "efc_aware": 435.0,
+      "mean_discharge_load_frac_flat": 0.874,
+      "mean_discharge_load_frac_aware": 0.512
+    },
+    {
+      "hvac_MW": 0.25,
+      "aux_standing_MW": 1.423,
+      "reported_net_GBP": 235248,
+      "actual_net_GBP": 209528,
+      "aware_net_GBP": 301478,
+      "overstatement_pct": 12.3,
+      "recovered_by_modelling_pct": 43.9,
+      "reported_GBP_per_MW_yr": 9487,
+      "actual_GBP_per_MW_yr": 8450,
+      "aware_GBP_per_MW_yr": 12158,
+      "delivered_fraction_of_flat_schedule": 0.988,
+      "efc_flat": 432.9,
+      "efc_aware": 435.0,
+      "mean_discharge_load_frac_flat": 0.874,
+      "mean_discharge_load_frac_aware": 0.512
+    },
+    {
+      "hvac_MW": 0.5,
+      "aux_standing_MW": 1.673,
+      "reported_net_GBP": 141288,
+      "actual_net_GBP": 115567,
+      "aware_net_GBP": 207518,
+      "overstatement_pct": 22.3,
+      "recovered_by_modelling_pct": 79.6,
+      "reported_GBP_per_MW_yr": 5698,
+      "actual_GBP_per_MW_yr": 4660,
+      "aware_GBP_per_MW_yr": 8369,
+      "delivered_fraction_of_flat_schedule": 0.988,
+      "efc_flat": 432.9,
+      "efc_aware": 435.0,
+      "mean_discharge_load_frac_flat": 0.874,
+      "mean_discharge_load_frac_aware": 0.512
+    }
+  ]
+}

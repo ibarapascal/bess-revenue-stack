@@ -1,0 +1,4 @@
+hvac_MW,aux_standing_MW,reported_net_GBP,actual_net_GBP,aware_net_GBP,overstatement_pct,recovered_by_modelling_pct,reported_GBP_per_MW_yr,actual_GBP_per_MW_yr,aware_GBP_per_MW_yr,delivered_fraction_of_flat_schedule,efc_flat,efc_aware,mean_discharge_load_frac_flat,mean_discharge_load_frac_aware
+0.0,1.173,329209,303488,395438,8.5,30.3,13276,12239,15947,0.988,432.9,435.0,0.874,0.512
+0.25,1.423,235248,209528,301478,12.3,43.9,9487,8450,12158,0.988,432.9,435.0,0.874,0.512
+0.5,1.673,141288,115567,207518,22.3,79.6,5698,4660,8369,0.988,432.9,435.0,0.874,0.512

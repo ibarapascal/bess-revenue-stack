@@ -92,6 +92,36 @@ clearing price is known at gate closure and perfect foresight is close to achiev
 for that leg. The forecast-dependent part of a real revenue stack is within-day and
 balancing.
 
+**4. A flat round-trip efficiency does not just overstate revenue — it makes the
+battery operate at the wrong power level.**
+
+Converter loss has a load-independent part and a part that grows with the square of
+current, so efficiency peaks near half load and falls at both ends. Calibrated to
+field measurement of a utility-scale plant (85 % round trip at rated, 65 % at 10 %
+load), the curve is:
+
+| load | 5 % | 10 % | 25 % | 50 % | 75 % | 100 % |
+|---|---|---|---|---|---|---|
+| round-trip efficiency | 0.46 | 0.65 | 0.81 | 0.86 | 0.86 | 0.85 |
+
+| arm | net revenue (H1 2025) | vs truth |
+|---|---|---|
+| flat efficiency, as the model reports it | 329,209 | overstated by 8.5 % |
+| the same schedule, settled under the real curve | 303,488 | — |
+| optimised with the curve inside the program | 395,438 | +30.3 % |
+
+The first gap is the accounting error. The second is the operating error, and it is
+larger: knowing the curve moves mean discharge from 87 % to 51 % of rated power,
+toward the efficiency peak, rather than pushing for maximum power whenever the
+spread looks good. A model carrying a constant 0.9 cannot see that trade-off exists.
+
+Auxiliary draw is treated separately because it is not part of round-trip efficiency
+at all: it runs whether or not the battery cycles. The converter's no-load loss
+(1.17 MW, 2.3 % of rated) is applied as a standing draw in every arm, and thermal
+management is swept on top rather than asserted, because published BESS auxiliary
+figures vary too widely to pick one. At 0.5 MW of thermal load the accounting error
+grows from 8.5 % to 22.3 %.
+
 ## What is different here
 
 **Degradation level comes from the field, shape comes from the cell.** Public
@@ -136,10 +166,18 @@ the market data; subsequent runs are offline.
 ## Status and what is not claimed
 
 Work in progress. Rolling-horizon execution against an out-of-sample forecast is in
-place, so the headline numbers are foresight-adjusted rather than theoretical. Next:
-a converter efficiency curve and thermal parasitic load, where field measurement of a
-utility-scale plant puts round-trip efficiency at 85 % near rated power but 65 % at
-low load — against the constant 0.9 that most public models assume.
+place, so the headline numbers are foresight-adjusted rather than theoretical, and a
+load-dependent converter model is inside the optimiser. Next: combining the
+efficiency curve with the reserve market so that the two effects interact, and
+benchmarking against published GB revenue indices with the difference attributed
+layer by layer rather than asserted to match.
+
+One decomposition assumption is worth stating plainly: the field figures used to
+calibrate the converter are *system* round-trip efficiencies, and splitting them into
+a no-load term and a load-dependent term is a modelling choice, not a measurement.
+The split is what makes the loss enter a linear program exactly; a different split
+would move revenue between the standing-draw and the load-dependent channels without
+changing their sum.
 
 Leakage discipline is structural, not by care: every forecast feature is a lag, the
 model is refit only on data strictly before each forecast origin, and realised prices

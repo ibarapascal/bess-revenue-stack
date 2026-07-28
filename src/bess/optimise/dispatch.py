@@ -63,6 +63,8 @@ class DispatchConfig:
     allow_frequency: bool = True
     no_simultaneous: bool = False       # binary; off by default (LP solves faster, rarely binds)
     terminal_soc_frac: float | None = None   # pin end-of-window SOC to avoid horizon gaming
+    converter: object | None = None     # ConverterModel; None keeps the flat-efficiency model
+    aux_standing_mw: float = 0.0        # thermal management, bought at spot every period
 
 
 def solve_window(prices: np.ndarray, battery: Battery, cfg: DispatchConfig,
@@ -83,7 +85,21 @@ def solve_window(prices: np.ndarray, battery: Battery, cfg: DispatchConfig,
     if cfg.no_simultaneous:
         on = [pulp.LpVariable(f"on_{t}", cat="Binary") for t in range(T)]
 
+    # Load-dependent converter loss, entered exactly as the upper envelope of the
+    # tangents to a convex loss curve — no binaries, no segment ordering.
+    conv = cfg.converter
+    if conv is not None:
+        tang = conv.tangents()
+        loss_d = [pulp.LpVariable(f"ld_{t}", 0, None) for t in range(T)]
+        loss_c = [pulp.LpVariable(f"lc_{t}", 0, None) for t in range(T)]
+        for t in range(T):
+            for a, b in tang:
+                m += loss_d[t] >= a * dis[t] + b
+                m += loss_c[t] >= a * chg[t] + b
+
     energy_rev = pulp.lpSum((prices[t] * (dis[t] - chg[t]) * dt) for t in range(T))
+    if cfg.aux_standing_mw:
+        energy_rev -= pulp.lpSum((prices[t] * cfg.aux_standing_mw * dt) for t in range(T))
     fr_rev = pulp.lpSum((fr_prices[t] * res[t] * dt) for t in range(T)) if use_fr else 0
     deg_arb = pulp.lpSum((cfg.c_deg_arbitrage * dis[t] * dt) for t in range(T))
     deg_fr = pulp.lpSum((cfg.c_deg_frequency * res[t] * cfg.fr_utilisation * dt)
@@ -93,7 +109,12 @@ def solve_window(prices: np.ndarray, battery: Battery, cfg: DispatchConfig,
     m += soc[0] == soc0
     for t in range(T):
         # (1) energy balance
-        m += soc[t + 1] == soc[t] + battery.eta_charge * chg[t] * dt - dis[t] * dt / battery.eta_discharge
+        if conv is None:
+            m += soc[t + 1] == soc[t] + battery.eta_charge * chg[t] * dt - dis[t] * dt / battery.eta_discharge
+        else:
+            # what leaves the cells is the delivered power plus conversion loss;
+            # what reaches the cells is the drawn power minus conversion loss
+            m += soc[t + 1] == soc[t] + (chg[t] - loss_c[t]) * dt - (dis[t] + loss_d[t]) * dt
         # (2) power coupling: reserve competes with energy for the same converter
         if use_fr:
             m += dis[t] + res[t] <= battery.power_mw
@@ -119,6 +140,8 @@ def solve_window(prices: np.ndarray, battery: Battery, cfg: DispatchConfig,
     soc_v = np.array([v(x) for x in soc])
 
     rev_energy = float(np.sum(prices * (dis_v - chg_v) * dt))
+    if cfg.aux_standing_mw:
+        rev_energy -= float(np.sum(prices * cfg.aux_standing_mw * dt))
     rev_fr = float(np.sum(fr_prices * res_v * dt)) if use_fr else 0.0
     cost_deg = float(cfg.c_deg_arbitrage * np.sum(dis_v) * dt
                      + (cfg.c_deg_frequency * np.sum(res_v) * cfg.fr_utilisation * dt if use_fr else 0.0))
@@ -163,6 +186,8 @@ def run_backtest(df: pd.DataFrame, battery: Battery, cfg: DispatchConfig,
         chg, dis, res = r["charge_mw"][:k], r["discharge_mw"][:k], r["reserve_mw"][:k]
         p_act = actual[i:i + k]
         rev_e = float(np.sum(p_act * (dis - chg) * cfg.dt_hours))
+        if cfg.aux_standing_mw:
+            rev_e -= float(np.sum(p_act * cfg.aux_standing_mw * cfg.dt_hours))
         rev_f = float(np.sum(fr_actual[i:i + k] * res * cfg.dt_hours)) if fr_col else 0.0
         cost = float(cfg.c_deg_arbitrage * np.sum(dis) * cfg.dt_hours
                      + (cfg.c_deg_frequency * np.sum(res) * cfg.fr_utilisation * cfg.dt_hours
@@ -190,3 +215,46 @@ def run_backtest(df: pd.DataFrame, battery: Battery, cfg: DispatchConfig,
         "days": days,
         "revenue_per_mw_year": float(tot / battery.power_mw / days * 365.0),
     }
+
+
+def simulate(schedule_chg: np.ndarray, schedule_dis: np.ndarray, prices: np.ndarray,
+             battery: Battery, cfg: DispatchConfig, converter) -> dict:
+    """Settle a fixed schedule under the true converter model.
+
+    A schedule optimised on a flat 0.9 efficiency is not generally deliverable once
+    load-dependent losses are applied: the energy simply is not there. Rather than
+    quietly repairing it, actions are clipped to what the state of charge allows,
+    which is what the plant would actually do, and the shortfall shows up as lost
+    revenue rather than as an infeasible model.
+    """
+    dt = cfg.dt_hours
+    soc = battery.soc_init
+    rev = 0.0
+    dis_done = np.zeros_like(schedule_dis)
+    chg_done = np.zeros_like(schedule_chg)
+    for t in range(len(prices)):
+        d, c = float(schedule_dis[t]), float(schedule_chg[t])
+        if d > 0:
+            avail = max(soc - battery.soc_min, 0.0)
+            need = (d + float(converter.loss_mw(d, variable_only=True))) * dt
+            if need > avail:
+                scale = avail / need if need > 0 else 0.0
+                d *= scale
+            soc -= (d + float(converter.loss_mw(d, variable_only=True))) * dt if d > 0 else 0.0
+        if c > 0:
+            room = max(battery.soc_max - soc, 0.0)
+            gain = (c - float(converter.loss_mw(c, variable_only=True))) * dt
+            if gain > room:
+                scale = room / gain if gain > 0 else 0.0
+                c *= scale
+            soc += (c - float(converter.loss_mw(c, variable_only=True))) * dt if c > 0 else 0.0
+        soc = min(max(soc, battery.soc_min), battery.soc_max)
+        rev += prices[t] * (d - c) * dt
+        if cfg.aux_standing_mw:
+            rev -= prices[t] * cfg.aux_standing_mw * dt
+        dis_done[t], chg_done[t] = d, c
+    deg = cfg.c_deg_arbitrage * float(np.sum(dis_done)) * dt
+    return {"revenue_energy": float(rev), "cost_degradation": deg,
+            "revenue_net": float(rev - deg),
+            "throughput_mwh": float(np.sum(dis_done) * dt),
+            "delivered_fraction": float(np.sum(dis_done) / max(np.sum(schedule_dis), 1e-9))}
