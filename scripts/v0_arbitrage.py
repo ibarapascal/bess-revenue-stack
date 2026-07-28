@@ -64,8 +64,10 @@ def main(start: str, end: str):
     summary = {
         "window": [start, end], "battery": "50 MW / 100 MWh (2 h)",
         "note": "perfect foresight — theoretical upper bound, not an achievable revenue",
-        "degradation_cost_share_of_gross": {
-            r.scenario: round(r.deg_cost_GBP / base.gross_energy_GBP * 100, 1)
+        # share of *its own* gross margin: dispatch changes with c_deg, so dividing
+        # every scenario by the zero-cost scenario's gross would mix bases
+        "degradation_cost_share_of_own_gross": {
+            r.scenario: round(r.deg_cost_GBP / r.gross_energy_GBP * 100, 1)
             for _, r in res.iloc[1:].iterrows()},
         "efc_reduction_vs_no_cost": {
             r.scenario: round((1 - r.efc_per_year / base.efc_per_year) * 100, 1)
@@ -74,8 +76,8 @@ def main(start: str, end: str):
     }
     (OUT / "v0_arbitrage.json").write_text(json.dumps(summary, indent=2))
     print("\n--- what this says ---")
-    print("degradation cost as % of gross arbitrage margin:",
-          summary["degradation_cost_share_of_gross"])
+    print("degradation cost as % of own gross arbitrage margin:",
+          summary["degradation_cost_share_of_own_gross"])
     print("cycling reduction vs ignoring degradation (% EFC/yr):",
           summary["efc_reduction_vs_no_cost"])
     print(f"\nwritten: {OUT/'v0_arbitrage.csv'}")

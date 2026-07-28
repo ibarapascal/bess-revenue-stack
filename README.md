@@ -92,35 +92,39 @@ clearing price is known at gate closure and perfect foresight is close to achiev
 for that leg. The forecast-dependent part of a real revenue stack is within-day and
 balancing.
 
-**4. A flat round-trip efficiency does not just overstate revenue — it makes the
-battery operate at the wrong power level.**
+**4. Of everything a conventional efficiency assumption gets wrong, the expensive
+part is not the efficiency curve — it is the auxiliary load nobody models.**
 
-Converter loss has a load-independent part and a part that grows with the square of
+Converter loss has a load-independent part and a part growing with the square of
 current, so efficiency peaks near half load and falls at both ends. Calibrated to
 field measurement of a utility-scale plant (85 % round trip at rated, 65 % at 10 %
-load), the curve is:
+load):
 
 | load | 5 % | 10 % | 25 % | 50 % | 75 % | 100 % |
 |---|---|---|---|---|---|---|
 | round-trip efficiency | 0.46 | 0.65 | 0.81 | 0.86 | 0.86 | 0.85 |
 
-| arm | net revenue (H1 2025) | vs truth |
+Four arms, each isolating one omission (H1 2025, thermal load 0 to 0.2 MW):
+
+| arm | net revenue | |
 |---|---|---|
-| flat efficiency, as the model reports it | 329,209 | overstated by 8.5 % |
-| the same schedule, settled under the real curve | 303,488 | — |
-| optimised with the curve inside the program | 343,974 | +13.3 % |
+| conventional: flat 0.9, no auxiliary draw | 770,035 | what a typical model prints |
+| the same schedule, paying auxiliaries | 592,407–667,575 | 80–87 % of the total gap |
+| the same schedule, also settled on the real curve | 566,656–641,825 | the remaining 13–20 % |
+| optimised with the curve inside the program | 589,542–664,711 | recovers 3.6–4.0 % |
 
-The first gap is the accounting error. The second is the operating error, and it is
-the larger of the two: knowing the curve moves mean discharge from 87 % to 50 % of rated power,
-toward the efficiency peak, rather than pushing for maximum power whenever the
-spread looks good. A model carrying a constant 0.9 cannot see that trade-off exists.
+The conventional number is overstated by 20 % with no thermal load at all, rising to
+36 % at 0.2 MW, and four fifths of that error is auxiliary consumption rather than the
+shape of the efficiency curve. Modelling the curve is worth about 4 %, and it barely
+moves dispatch — mean discharge load shifts from 87 % to 85 % of rated power, because
+charging the converter's no-load loss per active period rewards running hard for fewer
+periods, which offsets the pull toward the mid-load efficiency peak.
 
-Auxiliary draw is treated separately because it is not part of round-trip efficiency
-at all: it runs whether or not the battery cycles. The converter's no-load loss
-(1.17 MW, 2.3 % of rated) is applied as a standing draw in every arm, and thermal
-management is swept on top rather than asserted, because published BESS auxiliary
-figures vary too widely to pick one. At 0.5 MW of thermal load the accounting error
-grows from 8.5 % to 22.3 %.
+This finding is the one the project got most wrong before checking. Two modelling
+errors — applying the converter's no-load loss around the clock rather than only while
+running, and a degenerate loss relaxation during negative prices — had made the
+efficiency curve look worth 13–30 % and made dispatch appear to move to half load.
+Both were artefacts. The corrected result is smaller and points somewhere else.
 
 **5. Pricing wear by service rather than by the megawatt-hour changes what the
 battery does, not just what it reports.**
@@ -161,6 +165,12 @@ the *response* to depth, rate and temperature; the field range supplies the
 *level*; and the 1.4–3 %/yr spread is carried through as a band rather than
 collapsed to one number, because no public dataset of container-scale degradation
 exists to narrow it.
+
+**Auxiliary consumption is separated by where it actually arises.** The converter's
+no-load loss (1.17 MW, 2.3 % of rated) is charged only in periods when the converter
+runs, gated by one binary per period; thermal management is the genuinely
+round-the-clock part and is swept over 0–0.2 MW, an order of magnitude taken from the
+1–3 % of throughput that field data supports rather than picked for effect.
 
 **Degradation cost is differentiated by service.** Module tests on 220 Ah LFP under
 real grid duty profiles put peak-shifting ageing at 1.81–1.92× frequency regulation

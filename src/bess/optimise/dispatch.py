@@ -89,6 +89,13 @@ def solve_window(prices: np.ndarray, battery: Battery, cfg: DispatchConfig,
     # tangents to a convex loss curve — no binaries, no segment ordering.
     conv = cfg.converter
     if conv is not None:
+        # The converter's no-load loss exists only while the converter is running. An
+        # earlier version applied it around the clock, which for a battery that cycles
+        # a few hours a day inflated auxiliary consumption to about a quarter of
+        # throughput — an order of magnitude above the 1-3 %% that field data supports.
+        # One binary per period gates it, which CBC handles without difficulty at this
+        # size, and is the physically correct model rather than a convenient one.
+        active = [pulp.LpVariable(f"on_conv_{t}", cat="Binary") for t in range(T)]
         tang = conv.tangents(n=12)
         loss_d = [pulp.LpVariable(f"ld_{t}", 0, None) for t in range(T)]
         loss_c = [pulp.LpVariable(f"lc_{t}", 0, None) for t in range(T)]
@@ -104,10 +111,15 @@ def solve_window(prices: np.ndarray, battery: Battery, cfg: DispatchConfig,
             # (P^2/Pr <= P on [0, Pr]) and removes that degree of freedom.
             m += loss_c[t] <= conv.k2 * chg[t]
             m += loss_d[t] <= conv.k2 * dis[t]
+            m += chg[t] + dis[t] <= battery.power_mw * active[t]
 
     energy_rev = pulp.lpSum((prices[t] * (dis[t] - chg[t]) * dt) for t in range(T))
     if cfg.aux_standing_mw:
         energy_rev -= pulp.lpSum((prices[t] * cfg.aux_standing_mw * dt) for t in range(T))
+    if conv is not None:
+        # no-load loss bought from the market, only in periods when the converter runs
+        energy_rev -= pulp.lpSum((prices[t] * conv.fixed_loss_mw * active[t] * dt)
+                                 for t in range(T))
     fr_rev = pulp.lpSum((fr_prices[t] * res[t] * dt) for t in range(T)) if use_fr else 0
     deg_arb = pulp.lpSum((cfg.c_deg_arbitrage * dis[t] * dt) for t in range(T))
     deg_fr = pulp.lpSum((cfg.c_deg_frequency * res[t] * cfg.fr_utilisation * dt)
@@ -159,6 +171,9 @@ def solve_window(prices: np.ndarray, battery: Battery, cfg: DispatchConfig,
     rev_energy = float(np.sum(prices * (dis_v - chg_v) * dt))
     if cfg.aux_standing_mw:
         rev_energy -= float(np.sum(prices * cfg.aux_standing_mw * dt))
+    if conv is not None:
+        act = ((chg_v + dis_v) > 1e-6).astype(float)
+        rev_energy -= float(np.sum(prices * conv.fixed_loss_mw * act * dt))
     rev_fr = float(np.sum(fr_prices * res_v * dt)) if use_fr else 0.0
     cost_deg = float(cfg.c_deg_arbitrage * np.sum(dis_v) * dt
                      + (cfg.c_deg_frequency * np.sum(res_v) * cfg.fr_utilisation * dt if use_fr else 0.0))
@@ -205,6 +220,9 @@ def run_backtest(df: pd.DataFrame, battery: Battery, cfg: DispatchConfig,
         rev_e = float(np.sum(p_act * (dis - chg) * cfg.dt_hours))
         if cfg.aux_standing_mw:
             rev_e -= float(np.sum(p_act * cfg.aux_standing_mw * cfg.dt_hours))
+        if cfg.converter is not None:
+            act = ((chg + dis) > 1e-6).astype(float)
+            rev_e -= float(np.sum(p_act * cfg.converter.fixed_loss_mw * act * cfg.dt_hours))
         rev_f = float(np.sum(fr_actual[i:i + k] * res * cfg.dt_hours)) if fr_col else 0.0
         cost = float(cfg.c_deg_arbitrage * np.sum(dis) * cfg.dt_hours
                      + (cfg.c_deg_frequency * np.sum(res) * cfg.fr_utilisation * cfg.dt_hours
@@ -251,24 +269,35 @@ def simulate(schedule_chg: np.ndarray, schedule_dis: np.ndarray, prices: np.ndar
     chg_done = np.zeros_like(schedule_chg)
     for t in range(len(prices)):
         d, c = float(schedule_dis[t]), float(schedule_chg[t])
+        # Clipping solves the quadratic exactly rather than scaling linearly. Loss is
+        # quadratic in power, so a linear rescale leaves energy unused and biases the
+        # settled revenue downward — which would flatter the very comparison this
+        # function exists to make.
+        a = converter.k2 / converter.p_rated_mw
         if d > 0:
             avail = max(soc - battery.soc_min, 0.0)
-            need = (d + float(converter.loss_mw(d, variable_only=True))) * dt
+            need = (d + a * d ** 2) * dt
             if need > avail:
-                scale = avail / need if need > 0 else 0.0
-                d *= scale
-            soc -= (d + float(converter.loss_mw(d, variable_only=True))) * dt if d > 0 else 0.0
+                # solve a*d^2 + d = avail/dt for d >= 0
+                d = (-1.0 + (1.0 + 4.0 * a * avail / dt) ** 0.5) / (2.0 * a) if a > 0 \
+                    else avail / dt
+                d = max(d, 0.0)
+            soc -= (d + a * d ** 2) * dt
         if c > 0:
             room = max(battery.soc_max - soc, 0.0)
-            gain = (c - float(converter.loss_mw(c, variable_only=True))) * dt
+            gain = (c - a * c ** 2) * dt
             if gain > room:
-                scale = room / gain if gain > 0 else 0.0
-                c *= scale
-            soc += (c - float(converter.loss_mw(c, variable_only=True))) * dt if c > 0 else 0.0
+                # solve c - a*c^2 = room/dt, smaller root (the physical branch)
+                disc = 1.0 - 4.0 * a * room / dt
+                c = (1.0 - disc ** 0.5) / (2.0 * a) if (a > 0 and disc >= 0) else room / dt
+                c = max(c, 0.0)
+            soc += (c - a * c ** 2) * dt
         soc = min(max(soc, battery.soc_min), battery.soc_max)
         rev += prices[t] * (d - c) * dt
         if cfg.aux_standing_mw:
             rev -= prices[t] * cfg.aux_standing_mw * dt
+        if (d + c) > 1e-6:
+            rev -= prices[t] * converter.fixed_loss_mw * dt
         dis_done[t], chg_done[t] = d, c
     deg = cfg.c_deg_arbitrage * float(np.sum(dis_done)) * dt
     return {"revenue_energy": float(rev), "cost_degradation": deg,

@@ -1,4 +1,5 @@
-hvac_MW,aux_standing_MW,reported_net_GBP,actual_net_GBP,aware_net_GBP,overstatement_pct,recovered_by_modelling_pct,reported_GBP_per_MW_yr,actual_GBP_per_MW_yr,aware_GBP_per_MW_yr,delivered_fraction_of_flat_schedule,efc_flat,efc_aware,mean_discharge_load_frac_flat,mean_discharge_load_frac_aware
-0.0,1.173,329209,303488,343974,8.5,13.3,13276,12239,13871,0.988,432.9,433.1,0.874,0.502
-0.25,1.423,235248,209528,250014,12.3,19.3,9487,8450,10082,0.988,432.9,433.1,0.874,0.502
-0.5,1.673,141288,115567,156054,22.3,35.0,5698,4660,6293,0.988,432.9,433.1,0.874,0.502
+hvac_MW,aux_standing_MW,conventional_net_GBP,with_aux_net_GBP,actual_net_GBP,aware_net_GBP,overstatement_pct,share_of_gap_from_aux_pct,recovered_by_modelling_pct,reported_GBP_per_MW_yr,actual_GBP_per_MW_yr,aware_GBP_per_MW_yr,delivered_fraction_of_flat_schedule,efc_flat,efc_aware,mean_discharge_load_frac_flat,mean_discharge_load_frac_aware
+0.0,0.0,770035,667575,641825,664711,20.0,79.9,3.6,31053,25883,26806,0.988,432.9,353.9,0.874,0.849
+0.05,0.05,770035,648783,623033,645919,23.6,82.5,3.7,31053,25125,26048,0.988,432.9,353.9,0.874,0.849
+0.1,0.1,770035,629991,604241,627127,27.4,84.5,3.8,31053,24367,25290,0.988,432.9,353.9,0.874,0.849
+0.2,0.2,770035,592407,566656,589542,35.9,87.3,4.0,31053,22851,23774,0.988,432.9,353.9,0.874,0.849
