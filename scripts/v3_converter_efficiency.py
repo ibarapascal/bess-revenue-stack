@@ -18,9 +18,12 @@ include, which understated the very gap being measured.
                 under the same physics. The gap to `actual` is what modelling the
                 curve is worth, as opposed to merely accounting for it.
 
-The two effects differ in kind: omission inflates the reported number, while modelling
-the curve recovers real revenue by steering the battery toward the load band where the
-converter is efficient.
+The two effects differ in kind and, as it turns out, in sign. Omitting auxiliaries
+always inflates the reported number. Assuming flat efficiency does not: calibrated to
+the field plant's auxiliary-excluded AC round trip, the real curve *beats* a flat 0.9
+everywhere above about a quarter load, which is where a 2-hour battery spends its
+discharge. So the components are reported in pounds rather than as shares of a gap that
+passes through zero.
 
 Run:  PYTHONPATH=src python3 scripts/v3_converter_efficiency.py 2025-01-01 2025-06-30
 """
@@ -104,7 +107,14 @@ def main(start: str, end: str):
 
         overstate = (flat["revenue_net"] / actual["revenue_net"] - 1) * 100
         recover = (aware["revenue_net"] / actual["revenue_net"] - 1) * 100
-        due_to_aux = (flat["revenue_net"] - with_aux) / max(flat["revenue_net"] - actual["revenue_net"], 1e-9) * 100
+        # The two error components have opposite signs once the efficiency curve is
+        # calibrated to the auxiliary-excluded AC round trip, so a "share of the gap"
+        # percentage is not defined: the denominator passes through zero. Report both
+        # components in pounds, signed, and let the reader add them.
+        #   aux   > 0 always: the cost of consumption the conventional arm ignores
+        #   curve < 0 when the real curve beats flat 0.9 in the operating load band
+        err_aux = flat["revenue_net"] - with_aux
+        err_curve = with_aux - actual["revenue_net"]
         rows.append({
             "hvac_MW": hvac_mw, "aux_standing_MW": round(aux_mw, 3),
             "conventional_net_GBP": round(flat["revenue_net"]),
@@ -112,7 +122,8 @@ def main(start: str, end: str):
             "actual_net_GBP": round(actual["revenue_net"]),
             "aware_net_GBP": round(aware["revenue_net"]),
             "overstatement_pct": round(overstate, 1),
-            "share_of_gap_from_aux_pct": round(due_to_aux, 1),
+            "error_from_aux_GBP": round(err_aux),
+            "error_from_curve_shape_GBP": round(err_curve),
             "recovered_by_modelling_pct": round(recover, 1),
             "reported_GBP_per_MW_yr": round(pmy(flat["revenue_net"])),
             "actual_GBP_per_MW_yr": round(pmy(actual["revenue_net"])),
@@ -128,7 +139,7 @@ def main(start: str, end: str):
         })
         print(f"  hvac {hvac_mw:4.2f} (aux {aux_mw:4.2f} MW) | conventional {flat['revenue_net']:>9,.0f}"
               f" -> +aux {with_aux:>9,.0f} -> actual {actual['revenue_net']:>9,.0f}"
-              f"  (overstated {overstate:6.1f}%, {due_to_aux:4.0f}% of the gap is aux)"
+              f"  (overstated {overstate:6.1f}%; aux {err_aux:>+9,.0f}, curve {err_curve:>+8,.0f} GBP)"
               f"  | aware {aware['revenue_net']:>9,.0f} ({recover:+5.1f}%)")
 
     res = pd.DataFrame(rows)
@@ -136,25 +147,38 @@ def main(start: str, end: str):
     r0, rl = rows[0], rows[-1]
     summary = {
         "window": [start, end], "battery": "50 MW / 100 MWh (2 h)",
-        "converter": {"calibration": "one-way 0.922 at rated, 0.806 at 10 % load "
-                                     "(round trip 0.85 / 0.65), after field measurement of a "
-                                     "utility-scale BESS, doi:10.1016/j.est.2023.107232",
+        "converter": {"calibration": "AC round-trip efficiency, auxiliary-excluded, from the "
+                                     "year-one fitted curve of a 500 kW / 822 kWh NMC plant in "
+                                     "southern Italy measured at 11 setpoints "
+                                     "(doi:10.1016/j.est.2023.107232, Eq. 8 and Table 6): "
+                                     "0.937 round trip near rated, 0.771 at 0.1 p.u., entered as "
+                                     "one-way 0.968 / 0.878 under the paper's symmetric convention",
+                      "calibration_note": "that paper's better-known 0.85 / 0.65 pair is its "
+                                          "*global* efficiency (Eq. 11), whose denominator "
+                                          "includes auxiliary energy; calibrating to it while "
+                                          "charging auxiliaries separately double-counts them, and "
+                                          "most of its low-load droop is cycle duration (26.4 h "
+                                          "per cycle at 0.1 p.u. against 2.6 h at rated) rather "
+                                          "than part-load electronics",
                       "efficiency_by_load": dict(zip([f"{x:.0%}" for x in s["load_frac"]],
                                                      s["round_trip"]))},
         "finding": (
-            f"a conventional flat-efficiency model with no auxiliary load overstates net arbitrage "
-            f"revenue by {r0['overstatement_pct']:.0f} % with no thermal load at all and "
-            f"{rl['overstatement_pct']:.0f} % at {rl['hvac_MW']:.2f} MW of it. Between "
-            f"{r0['share_of_gap_from_aux_pct']:.0f} and {rl['share_of_gap_from_aux_pct']:.0f} % of "
-            f"that error is omitted auxiliary consumption; the shape of the efficiency curve is "
-            f"the small remainder. Putting the curve inside the optimiser recovers only "
-            f"{r0['recovered_by_modelling_pct']:.1f}-{rl['recovered_by_modelling_pct']:.1f} % and "
-            f"leaves dispatch essentially unchanged (mean discharge load "
-            f"{r0['mean_discharge_load_frac_flat']:.1%} against "
-            f"{r0['mean_discharge_load_frac_aware']:.1%} of rated power): once the no-load loss is "
-            f"charged per active period, running hard for fewer periods pays for itself, which "
-            f"cancels the pull toward the mid-load efficiency peak. The expensive omission is the "
-            f"auxiliary load, not the curve"),
+            f"the two errors inside a conventional flat-efficiency assumption have opposite signs, "
+            f"and for a 2-hour battery they nearly cancel unless a standing auxiliary load is "
+            f"present. With no thermal load the conventional model is {abs(r0['overstatement_pct']):.1f} % "
+            f"{'low' if r0['overstatement_pct'] < 0 else 'high'}: a flat 0.9 round trip understates "
+            f"the real converter in the 86 %-of-rated band this asset actually discharges at, and "
+            f"that gain ({-r0['error_from_curve_shape_GBP']:+,.0f} GBP) slightly exceeds the cost of "
+            f"the no-load draw it ignores ({r0['error_from_aux_GBP']:+,.0f} GBP). Every pound of net "
+            f"overstatement therefore traces to the standing auxiliary load, rising roughly linearly "
+            f"with it to {rl['overstatement_pct']:.0f} % at {rl['hvac_MW']:.2f} MW. Putting the curve "
+            f"inside the optimiser is worth {r0['recovered_by_modelling_pct']:.1f}-"
+            f"{rl['recovered_by_modelling_pct']:.1f} % and does move dispatch, pushing mean discharge "
+            f"load from {r0['mean_discharge_load_frac_flat']:.1%} to "
+            f"{r0['mean_discharge_load_frac_aware']:.1%} of rated, because an auxiliary-excluded "
+            f"curve rises monotonically toward rated power instead of peaking mid-load. The "
+            f"expensive omission is the auxiliary load; the flat efficiency itself is close to "
+            f"harmless here, and in the wrong direction from the usual assumption"),
         "table": rows,
     }
     (OUT / "v3_converter_efficiency.json").write_text(json.dumps(summary, indent=2))

@@ -5,8 +5,12 @@ Almost every published dispatch model carries one degradation cost per MWh of
 throughput, regardless of what the energy was moved for. Module testing says that
 is wrong: under real grid duty profiles, 220 Ah LFP modules doing peak shifting aged
 1.81x (25 degC) to 1.92x (40 degC) faster than the same modules doing frequency
-regulation at comparable throughput (doi:10.3389/fenrg.2025.1528691). Deep, slow,
-directional cycling damages a cell more than shallow, fast, symmetric cycling.
+regulation at comparable throughput (Xu et al. 2025, doi:10.3389/fenrg.2025.1528691).
+Deep, slow, directional cycling damages a cell more than shallow, fast, symmetric
+cycling. The sign holds on a different chemistry: NMC532/graphite cells under five
+grid duty profiles show "a slower trend for FR and a faster rate for PS", driven by
+state-of-charge swing amplitude rather than C-rate (Ohrelius et al. 2024,
+doi:10.1149/1945-7111/ad92db).
 
 The question this script answers is not whether the ratio is exactly 1.85. It is
 whether carrying the distinction changes anything a plant operator would do. If the

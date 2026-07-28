@@ -1,5 +1,5 @@
-hvac_MW,aux_standing_MW,conventional_net_GBP,with_aux_net_GBP,actual_net_GBP,aware_net_GBP,overstatement_pct,share_of_gap_from_aux_pct,recovered_by_modelling_pct,reported_GBP_per_MW_yr,actual_GBP_per_MW_yr,aware_GBP_per_MW_yr,delivered_fraction_of_flat_schedule,efc_flat,efc_aware,mean_discharge_load_frac_flat,mean_discharge_load_frac_aware
-0.0,0.0,624632,559444,542263,557198,15.2,79.1,2.8,25189,21868,22470,0.987,278.9,219.4,0.863,0.862
-0.05,0.05,624632,540651,523471,538406,19.3,83.0,2.9,25189,21110,21712,0.987,278.9,219.4,0.863,0.862
-0.1,0.1,624632,521859,504679,519614,23.8,85.7,3.0,25189,20352,20954,0.987,278.9,219.4,0.863,0.862
-0.2,0.2,624632,484275,467095,482030,33.7,89.1,3.2,25189,18836,19439,0.987,278.9,219.4,0.863,0.862
+hvac_MW,aux_standing_MW,conventional_net_GBP,with_aux_net_GBP,actual_net_GBP,aware_net_GBP,overstatement_pct,error_from_aux_GBP,error_from_curve_shape_GBP,recovered_by_modelling_pct,reported_GBP_per_MW_yr,actual_GBP_per_MW_yr,aware_GBP_per_MW_yr,delivered_fraction_of_flat_schedule,efc_flat,efc_aware,mean_discharge_load_frac_flat,mean_discharge_load_frac_aware
+0.0,0.0,624632,586556,629710,653914,-0.8,38076,-43154,3.8,25189,25394,26370,1.0,278.9,309.4,0.863,0.904
+0.05,0.05,624632,567764,610918,635121,2.2,56868,-43154,4.0,25189,24636,25612,1.0,278.9,309.4,0.863,0.904
+0.1,0.1,624632,548972,592126,616329,5.5,75660,-43154,4.1,25189,23879,24855,1.0,278.9,309.4,0.863,0.904
+0.2,0.2,624632,511388,554542,578745,12.6,113244,-43154,4.4,25189,22363,23339,1.0,278.9,309.4,0.863,0.904

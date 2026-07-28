@@ -89,7 +89,69 @@ def fig_degradation():
     print("figures/degradation.png")
 
 
+def fig_efficiency_error():
+    """The two errors in a flat-efficiency assumption point in opposite directions."""
+    v3 = pd.read_csv(RES / "v3_converter_efficiency.csv").sort_values("hvac_MW")
+    x = range(len(v3))
+    fig, ax = plt.subplots(figsize=(6.0, 3.6))
+    ax.bar([i - 0.19 for i in x], v3.error_from_aux_GBP / 1e3, width=0.38,
+           color="#c44e52", label="omitted auxiliary load")
+    ax.bar([i + 0.19 for i in x], v3.error_from_curve_shape_GBP / 1e3, width=0.38,
+           color="#4878a8", label="assumed flat efficiency")
+    ax.axhline(0, color="0.3", lw=0.8)
+    ax2 = ax.twinx()
+    ax2.plot(list(x), v3.overstatement_pct, "o-", color="#55a868", lw=1.4,
+             label="net overstatement (%)")
+    ax2.grid(False)
+    # Pin the two zeros to the same height. Without this the line appears to cross
+    # zero at a different place from the bars, which is exactly the wrong thing to
+    # misread on a chart whose whole point is a sign change.
+    y0, y1 = ax.get_ylim()
+    frac = -y0 / (y1 - y0)
+    top = float(v3.overstatement_pct.max()) * 1.15
+    ax2.set_ylim(-frac / (1 - frac) * top, top)
+    ax.set_xticks(list(x))
+    ax.set_xticklabels([f"{h:.2f}" for h in v3.hvac_MW])
+    ax.set_xlabel("standing thermal load (MW)")
+    ax.set_ylabel("error in reported net revenue (£k, H1 2025)")
+    ax2.set_ylabel("net overstatement (%)")
+    ax.set_title("A flat efficiency assumption errs in both directions at once\n"
+                 "positive overstates revenue, negative understates it", fontsize=9.5)
+    h1, l1 = ax.get_legend_handles_labels(); h2, l2 = ax2.get_legend_handles_labels()
+    ax.legend(h1 + h2, l1 + l2, fontsize=8, loc="upper left")
+    fig.tight_layout(); fig.savefig(FIG / "efficiency_error.png"); plt.close(fig)
+    print("figures/efficiency_error.png")
+
+
+def fig_service_cdeg():
+    """Pricing wear by service decides market entry, not just bookkeeping."""
+    v4 = pd.read_csv(RES / "v4_service_cdeg.csv")
+    flat = v4[v4.ageing_ratio == 1.0].sort_values("fr_price")
+    diff = v4[v4.ageing_ratio == 1.85].sort_values("fr_price")
+    x = range(len(flat))
+    fig, ax = plt.subplots(figsize=(5.6, 3.5))
+    ax.bar([i - 0.19 for i in x], flat.mean_reserve_MW, width=0.38,
+           color="#8172b2", label="one degradation cost for all energy")
+    ax.bar([i + 0.19 for i in x], diff.mean_reserve_MW, width=0.38,
+           color="#dd8452", label="wear priced by service (1.85×)")
+    # the point of the chart: at the lowest price one model refuses the market outright
+    ax.annotate("declines the\nmarket entirely", xy=(-0.19, 0.4), xytext=(-0.30, 14),
+                fontsize=7.5, ha="center", color="#8172b2",
+                arrowprops=dict(arrowstyle="->", color="#8172b2", lw=0.8))
+    ax.set_xticks(list(x))
+    ax.set_xticklabels([f"£{p:.0f}" for p in flat.fr_price])
+    ax.set_xlabel("reserve availability price (£/MW/h)")
+    ax.set_ylabel("mean reserve held (MW of 50)")
+    ax.set_title("Whether the battery enters the reserve market at all\n"
+                 "depends on how its wear is priced", fontsize=9.5)
+    ax.legend(fontsize=8, loc="upper left")
+    fig.tight_layout(); fig.savefig(FIG / "service_cdeg.png"); plt.close(fig)
+    print("figures/service_cdeg.png")
+
+
 if __name__ == "__main__":
     fig_degradation()
     fig_waterfall()
     fig_transmission()
+    fig_efficiency_error()
+    fig_service_cdeg()

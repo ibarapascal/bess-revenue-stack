@@ -97,10 +97,19 @@ def check_converter_envelope():
     abs_err = float(np.max(np.abs(env - true)) / conv.p_rated_mw)
     check("tangent envelope reproduces the loss curve", abs_err < 0.001,
           f"max deviation {abs_err:.4%} of rated power over 0-100 % load")
+    # Calibration targets are the AC round-trip efficiency of the field plant, which
+    # excludes auxiliaries. Anchoring to that paper's auxiliary-*inclusive* global
+    # efficiency (0.85 / 0.65) is what an earlier version did, and it double-counted
+    # every auxiliary term the model adds on top.
     eff = conv.round_trip(np.array([0.1, 1.0]) * 50)
     check("converter reproduces its calibration points",
-          abs(eff[0] - 0.65) < 0.01 and abs(eff[1] - 0.85) < 0.01,
-          f"round trip {eff[0]:.3f} at 10 % load, {eff[1]:.3f} at rated")
+          abs(eff[0] - 0.771) < 0.01 and abs(eff[1] - 0.937) < 0.01,
+          f"round trip {eff[0]:.3f} at 10 % load, {eff[1]:.3f} at rated "
+          f"(AC round trip, auxiliary-excluded)")
+    check("calibration is not the auxiliary-inclusive metric",
+          eff[1] > 0.90,
+          f"{eff[1]:.3f} at rated is the AC-terminal figure; the global figure of "
+          f"0.85 includes the auxiliaries this model charges separately")
 
 
 def check_degradation_anchor():

@@ -131,10 +131,24 @@ class DegradationCost:
     service_multiplier
         Peak-shifting (deep, energy-arbitrage cycling) ages a cell roughly 1.8-1.9x
         faster than frequency regulation at equal throughput, measured on 220 Ah
-        LFP modules under real grid duty profiles (Frontiers in Energy Research 13,
-        2025, doi:10.3389/fenrg.2025.1528691: 1.81 at 25 degC, 1.92 at 40 degC).
+        LFP modules under real grid duty profiles (Xu et al., Frontiers in Energy
+        Research 13, 1528691, 2025, doi:10.3389/fenrg.2025.1528691: 1.81 at 25 degC,
+        1.92 at 40 degC, as a ratio of state-of-health-versus-throughput fit slopes).
         Only the *ratio* is portable; the absolute loss percentages come from an
-        accelerated test and are not annual field rates.
+        accelerated test and are not annual field rates. Two provenance caveats that
+        argue for sweeping rather than trusting the value: the modules are BYD
+        "gradient utilization" cells, i.e. second-life, and all authors are at a
+        single instrument manufacturer.
+        The direction is corroborated independently on a different chemistry.
+        Ohrelius et al. cycled NMC532/graphite 18650 cells at 40 degC under five grid
+        duty profiles and report "a slower trend for FR and a faster rate for PS",
+        attributing the difference to state-of-charge swing amplitude rather than
+        C-rate (J. Electrochem. Soc. 171(12) 120501, 2024,
+        doi:10.1149/1945-7111/ad92db); the same group's service-lifetime study puts
+        frequency regulation at 12 years against 8 for peak shifting, a ratio near
+        1.5 (Energies 16(7) 3003, 2023, doi:10.3390/en16073003). Two chemistries and
+        two measurement conventions agree on the sign and bracket the magnitude,
+        which is why the sweep runs 1.0-2.5 rather than stopping at 1.85.
         Note the assumption this carries: mapping a capacity-loss ratio onto a
         marginal-cost ratio presumes damage is proportional to throughput, which
         is exactly the linear-accumulation approximation (Miner's rule) that
