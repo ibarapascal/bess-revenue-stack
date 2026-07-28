@@ -53,17 +53,36 @@ def fig_waterfall():
 
 
 def fig_transmission():
-    """Forecast error to revenue is strongly non-linear."""
+    """The same runs on two skill axes. Which axis is used decides how non-linear the
+    relationship looks, so both are drawn rather than the flattering one."""
     t = pd.read_csv(RES / "v2_transmission.csv").sort_values("mae")
-    fig, ax = plt.subplots(figsize=(5.4, 3.4))
+    has_rho = "within_day_rank_corr" in t
+    fig, axes = plt.subplots(1, 2 if has_rho else 1, figsize=(8.4 if has_rho else 5.4, 3.5),
+                             squeeze=False)
+    ax = axes[0][0]
     ax.plot(t.mae, t.capture_net_pct, "o-", color="#4878a8", label="net revenue")
     if "capture_gross_pct" in t:
         ax.plot(t.mae, t.capture_gross_pct, "s--", color="#8172b2", label="gross margin")
     ax.invert_xaxis()
-    ax.set_xlabel("forecast MAE (£/MWh)  — better to the right")
+    ax.set_xlabel("forecast MAE (£/MWh) — better to the right")
     ax.set_ylabel("% of perfect-foresight revenue")
-    ax.set_title("Forecast skill buys revenue non-linearly", fontsize=9.5)
+    ax.set_title("on an error axis: looks strongly non-linear", fontsize=9)
     ax.legend(fontsize=8)
+
+    if has_rho:
+        ax2 = axes[0][1]
+        r = t.sort_values("within_day_rank_corr")
+        ax2.plot(r.within_day_rank_corr, r.capture_net_pct, "o-", color="#4878a8",
+                 label="net revenue")
+        # straight line between the endpoints, so departure from linearity is visible
+        # rather than asserted
+        ax2.plot([r.within_day_rank_corr.iloc[0], r.within_day_rank_corr.iloc[-1]],
+                 [r.capture_net_pct.iloc[0], r.capture_net_pct.iloc[-1]],
+                 ":", color="0.5", lw=1.0, label="straight line for reference")
+        ax2.set_xlabel("within-day rank correlation — better to the right")
+        ax2.set_title("on an ordering axis: close to linear", fontsize=9)
+        ax2.legend(fontsize=8)
+    fig.suptitle("What forecast skill buys depends on how skill is measured", fontsize=9.5)
     fig.tight_layout(); fig.savefig(FIG / "transmission.png"); plt.close(fig)
     print("figures/transmission.png")
 

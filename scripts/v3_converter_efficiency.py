@@ -90,15 +90,20 @@ def main(start: str, end: str):
         conv_fixed_cost = float(np.sum(prices[:len(sched)] * fixed * act) * 0.5)
         with_aux = conventional["revenue_net"] - hvac_mw * aux_energy_price_sum - conv_fixed_cost
 
+        # The arms must differ in the treatment variable and nothing else. An earlier
+        # version pinned the aware arm's end-of-window state of charge but not the
+        # conventional arm's, which is a second, undeclared difference: the pin costs
+        # the pinned arm revenue, so it understated what modelling the curve is worth.
+        # Nothing is pinned now — the overlapping horizon already removes the
+        # end-of-window gaming a pin was there to prevent. (`simulate` never read the
+        # setting at all, so it was dead on the settlement arm.)
         cfg_settle = DispatchConfig(c_deg_arbitrage=c_arb, allow_frequency=False,
-                                    terminal_soc_frac=0.5, aux_standing_mw=aux_mw,
-                                    converter=conv)
+                                    aux_standing_mw=aux_mw, converter=conv)
         actual = simulate(sched.charge_mw.to_numpy(), sched.discharge_mw.to_numpy(),
                           prices[:len(sched)], batt, cfg_settle, conv)
 
         cfg_aware = DispatchConfig(c_deg_arbitrage=c_arb, allow_frequency=False,
-                                   terminal_soc_frac=0.5, converter=conv,
-                                   aux_standing_mw=aux_mw)
+                                   converter=conv, aux_standing_mw=aux_mw)
         aware = run_backtest(df, batt, cfg_aware, window_periods=96, execute_periods=48)
         flat = conventional
 

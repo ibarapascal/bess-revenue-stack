@@ -1,0 +1,3 @@
+scenario,c_deg,pf_gross_GBP,gbm_net_GBP,overstatement_factor,capture_net_pct
+Italian field pair,30.56,3145765,380743,8.26,21.4
+"EPRI 2.3 %/yr, EFC assumed 300",20.3,3615462,876078,4.13,37.6

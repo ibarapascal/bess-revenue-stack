@@ -1,60 +1,60 @@
 {
   "window": [
-    "2025-01-01",
-    "2025-03-31"
+    "2024-03-01",
+    "2026-01-01"
   ],
   "battery": "50 MW / 100 MWh (2 h)",
   "note": "perfect foresight \u2014 theoretical upper bound, not an achievable revenue",
   "degradation_cost_share_of_own_gross": {
-    "Italian field pair, 1.37 %/yr at 119 EFC": 39.7,
-    "EPRI 2.3 %/yr, EFC assumed 300": 31.7,
-    "German upper 3 %/yr, EFC assumed 300": 37.3
+    "Italian field pair, 1.37 %/yr at 119 EFC": 43.4,
+    "EPRI 2.3 %/yr, EFC assumed 300": 35.5,
+    "German upper 3 %/yr, EFC assumed 300": 40.8
   },
   "efc_reduction_vs_no_cost": {
-    "Italian field pair, 1.37 %/yr at 119 EFC": 55.4,
-    "EPRI 2.3 %/yr, EFC assumed 300": 40.5,
-    "German upper 3 %/yr, EFC assumed 300": 49.2
+    "Italian field pair, 1.37 %/yr at 119 EFC": 66.7,
+    "EPRI 2.3 %/yr, EFC assumed 300": 52.8,
+    "German upper 3 %/yr, EFC assumed 300": 61.6
   },
   "table": [
     {
       "scenario": "no degradation cost",
       "assumed_efc_per_year": null,
       "c_deg": 0.0,
-      "gross_energy_GBP": 653902,
+      "gross_energy_GBP": 4169625,
       "deg_cost_GBP": 0,
-      "net_GBP": 653902,
-      "efc_per_year": 636.7,
-      "GBP_per_MW_year": 53026
+      "net_GBP": 4169625,
+      "efc_per_year": 729.2,
+      "GBP_per_MW_year": 45295
     },
     {
       "scenario": "Italian field pair, 1.37 %/yr at 119 EFC",
       "assumed_efc_per_year": 118.7,
       "c_deg": 30.56,
-      "gross_energy_GBP": 537884,
-      "deg_cost_GBP": 213784,
-      "net_GBP": 324101,
-      "efc_per_year": 283.7,
-      "GBP_per_MW_year": 26282
+      "gross_energy_GBP": 3150433,
+      "deg_cost_GBP": 1367349,
+      "net_GBP": 1783084,
+      "efc_per_year": 243.1,
+      "GBP_per_MW_year": 19370
     },
     {
       "scenario": "EPRI 2.3 %/yr, EFC assumed 300",
       "assumed_efc_per_year": 300.0,
       "c_deg": 20.3,
-      "gross_energy_GBP": 598218,
-      "deg_cost_GBP": 189684,
-      "net_GBP": 408535,
-      "efc_per_year": 378.9,
-      "GBP_per_MW_year": 33129
+      "gross_energy_GBP": 3620686,
+      "deg_cost_GBP": 1286705,
+      "net_GBP": 2333982,
+      "efc_per_year": 344.3,
+      "GBP_per_MW_year": 25354
     },
     {
       "scenario": "German upper 3 %/yr, EFC assumed 300",
       "assumed_efc_per_year": 300.0,
       "c_deg": 26.47,
-      "gross_energy_GBP": 565732,
-      "deg_cost_GBP": 211006,
-      "net_GBP": 354726,
-      "efc_per_year": 323.2,
-      "GBP_per_MW_year": 28766
+      "gross_energy_GBP": 3345793,
+      "deg_cost_GBP": 1366070,
+      "net_GBP": 1979724,
+      "efc_per_year": 280.3,
+      "GBP_per_MW_year": 21506
     }
   ]
 }

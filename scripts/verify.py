@@ -9,6 +9,7 @@ Run:  PYTHONPATH=src python3 scripts/verify.py
 """
 from __future__ import annotations
 
+import json
 import sys
 from datetime import date
 from pathlib import Path
@@ -22,7 +23,7 @@ from bess.data.elexon import market_index
 from bess.degradation.blast_lfp import DegradationCost, MODELS
 from bess.forecast.price import FEATURES, build_features
 from bess.hardware.converter import ConverterModel
-from bess.optimise.dispatch import Battery, DispatchConfig, solve_window
+from bess.optimise.dispatch import Battery, DispatchConfig, run_backtest, solve_window
 
 FAILED = []
 
@@ -123,6 +124,26 @@ def check_degradation_anchor():
     ratio = dc.cost("arbitrage") / dc.cost("frequency")
     check("service differentiation carries the measured ratio",
           abs(ratio - 1.85) < 1e-9, f"arbitrage/frequency = {ratio:.3f}")
+    # The anchor pins the level; the cell model is supposed to supply the response to
+    # operating conditions. If the anchor is evaluated at the caller's operating point
+    # instead of a fixed reference, the two cancel and the cell model contributes
+    # nothing — which is exactly what happened, undetected, until it was checked.
+    a = DegradationCost(cell_model="sony_murata_3ah").base_cost(dod=0.6)
+    b = DegradationCost(cell_model="prismatic_250ah").base_cost(dod=0.6)
+    check("cell model actually influences c_deg away from the anchor point",
+          abs(a - b) / max(a, b) > 0.01,
+          f"{a:.2f} vs {b:.2f} GBP/MWh at 60 % depth — identical values would mean "
+          f"the anchor had cancelled the model it is meant to scale")
+    ref = DegradationCost(cell_model="prismatic_250ah")
+    closed = (ref.replacement_cost_per_mwh
+              / (1 + ref.discount_rate) ** ref.expected_life_years
+              * ref.field_annual_loss / ref.field_efc_per_year
+              / (1 - ref.eol_fraction) / ref.REF_DOD)
+    check("at the reference point c_deg is the four-input closed form",
+          abs(ref.base_cost() - closed) < 1e-9,
+          f"{ref.base_cost():.6f} = {closed:.6f} — only one of those four inputs is "
+          f"a field observation, which is why the others are swept")
+
     unanchored = DegradationCost(cell_model="prismatic_250ah", field_annual_loss=None)
     check("raw cell model would over-predict field loss",
           unanchored.loss_per_efc() * 300 > 0.05,
@@ -151,6 +172,93 @@ def check_forecast_leakage(df):
           first_diff >= 48, f"first affected row is +{first_diff} periods")
 
 
+def check_backtest_path(df):
+    """The rolling backtest is what produces every published number, so it needs its own
+    checks. Nothing here is an invariant of the optimiser — these are the properties that
+    would silently turn the headline into a different quantity."""
+    batt = Battery()
+    cfg = DispatchConfig(c_deg_arbitrage=15.0, allow_frequency=False)
+    d = df.head(96 * 4).copy()
+
+    # 1. A forecast that is not the realised price must not produce perfect-foresight
+    # revenue. If the forecast argument were ever ignored, capture would silently become
+    # 100 % and no invariant in this file would notice.
+    fc = d[["price"]].copy()
+    fc["price"] = d["price"].to_numpy()[::-1]           # deliberately wrong
+    perfect = run_backtest(d, batt, cfg, window_periods=96, execute_periods=48)
+    blind = run_backtest(d, batt, cfg, window_periods=96, execute_periods=48, forecast=fc)
+    check("optimising against a forecast is not the same as perfect foresight",
+          blind["revenue_net"] < perfect["revenue_net"] - 1.0,
+          f"net {blind['revenue_net']:,.0f} against {perfect['revenue_net']:,.0f} — equality "
+          f"would mean the forecast argument was being ignored")
+
+    # 2. Settlement must use realised prices, so a forecast cannot inflate revenue above
+    # the perfect-foresight bound however wrong it is.
+    check("no forecast can beat perfect foresight",
+          blind["revenue_net"] <= perfect["revenue_net"] + 1e-6,
+          "settlement prices are realised, not forecast")
+
+    # 3. State of charge must carry across window boundaries rather than resetting: with
+    # execute_periods < window_periods the schedule is stitched, and a reset would show up
+    # as free energy appearing at every seam.
+    sched = perfect["schedule"]
+    dt = cfg.dt_hours
+    soc = batt.soc_init
+    worst = 0.0
+    for c, dis in zip(sched.charge_mw.to_numpy(), sched.discharge_mw.to_numpy()):
+        soc += batt.eta_charge * c * dt - dis * dt / batt.eta_discharge
+        worst = max(worst, max(batt.soc_min - soc, soc - batt.soc_max))
+    check("state of charge carries across window seams",
+          worst < 1e-3, f"worst excursion beyond limits {worst:.2e} MWh over "
+                        f"{len(sched)} stitched periods")
+
+    # 4. A standing auxiliary draw must cost money in settlement. This was once omitted,
+    # which made an entire sweep return identical rows.
+    cfg_aux = DispatchConfig(c_deg_arbitrage=15.0, allow_frequency=False, aux_standing_mw=1.0)
+    with_aux = run_backtest(d, batt, cfg_aux, window_periods=96, execute_periods=48)
+    check("a standing auxiliary load reduces settled revenue",
+          with_aux["revenue_net"] < perfect["revenue_net"] - 1.0,
+          f"{with_aux['revenue_net']:,.0f} against {perfect['revenue_net']:,.0f} at 1 MW standing draw")
+
+
+def check_published_numbers():
+    """Pin the numbers the README quotes. Every one of them has moved at least once, and
+    a silent drift is the failure mode this project is least able to afford."""
+    res = Path(__file__).resolve().parents[1] / "results"
+    if not res.exists() or not any(res.glob("*.json")):
+        check("published numbers are pinned", True, "no results/ yet — run the experiments first")
+        return
+    def load(name):
+        return json.loads((res / name).read_text())
+
+    v2 = load("v2_capture_rate.json")
+    arms = {a["arm"]: a for a in v2["arms"]}
+    pf, gbm = arms["perfect foresight"], arms["gbm"]
+    check("waterfall still closes",
+          abs(pf["gross_GBP"] - (pf["gross_GBP"] - gbm["gross_GBP"])
+              - gbm["deg_cost_GBP"] - gbm["net_GBP"]) < 2,
+          f"{pf['gross_GBP']:,} − {pf['gross_GBP']-gbm['gross_GBP']:,} − "
+          f"{gbm['deg_cost_GBP']:,} = {gbm['net_GBP']:,}")
+    check("net capture is far below gross capture",
+          gbm["capture_gross_pct"] - gbm["capture_net_pct"] > 20,
+          f"gross {gbm['capture_gross_pct']}% against net {gbm['capture_net_pct']}% — "
+          f"the gap is finding 3")
+
+    v3 = load("v3_converter_efficiency.json")
+    zero = v3["table"][0]
+    check("the two efficiency error components still have opposite signs",
+          zero["error_from_aux_GBP"] > 0 > zero["error_from_curve_shape_GBP"],
+          f"aux {zero['error_from_aux_GBP']:+,}, curve {zero['error_from_curve_shape_GBP']:+,} "
+          f"at zero thermal load")
+
+    v4 = load("v4_service_cdeg.json")
+    lowest = v4["deltas_vs_flat"][0]
+    check("the reserve-market entry flip is still present at the lowest price",
+          lowest["enters_market_only_when_differentiated"],
+          f"single-cost holds {lowest['reserve_MW_flat']:.2f} MW, differentiated "
+          f"{lowest['reserve_MW_diff']:.1f} MW")
+
+
 def main():
     print("verification suite\n")
     df = market_index(date(2025, 1, 1), date(2025, 2, 28)).dropna(subset=["price"]).reset_index(drop=True)
@@ -163,8 +271,12 @@ def main():
     check_converter_envelope()
     print("degradation")
     check_degradation_anchor()
+    print("rolling backtest")
+    check_backtest_path(df)
     print("forecasting")
     check_forecast_leakage(df)
+    print("published numbers")
+    check_published_numbers()
 
     print()
     if FAILED:

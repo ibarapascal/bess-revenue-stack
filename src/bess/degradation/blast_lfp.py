@@ -189,8 +189,17 @@ class DegradationCost:
     # Making the anchor self-consistent with the model's own cycling (a fixed point
     # in EFC) was considered and rejected: it would assume this asset cycles at the
     # same rate as the field systems, which is precisely what is unknown. Iterating
-    # to that fixed point moves c_deg from 17.7 to 10.9 GBP/MWh, so the choice is not
-    # cosmetic and is stated rather than buried.
+    # to that fixed point moves c_deg from 30.6 to about 10.9 GBP/MWh, so the choice
+    # is not cosmetic and is stated rather than buried.
+    #
+    # What the anchor does *not* do is make c_deg a measured quantity. At the
+    # reference operating point it reduces to
+    #     replacement_cost * discount_factor * field_loss / field_EFC / usable / dod
+    # in which only the field pair is observed. The other three inputs are
+    # conventions, and the result is sensitive to them: sweeping the discount rate
+    # over 0-12 %% moves c_deg from 76.9 to 19.8 GBP/MWh, replacement cost over
+    # 80-160 k/MWh from 20.4 to 40.7, and assumed life over 8-15 years from 41.6 to
+    # 24.3. "Field-anchored" names one factor out of four, not the product.
 
     def loss_per_efc(self, dod: float = 0.9, c_rate: float = 0.5, t_kelvin: float = 298.15) -> float:
         m = MODELS[self.cell_model]()
@@ -198,16 +207,31 @@ class DegradationCost:
             return float(m.cycle_rate(dod, c_rate, t_kelvin))
         return float(m.cycle_rate(dod, c_rate))
 
-    def anchor_factor(self, dod: float = 0.9) -> float:
-        """Scale that reconciles the cell model with observed field loss."""
+    # Operating point the field anchor is defined at. The anchor must be computed
+    # here and nowhere else: an earlier version evaluated it at the *caller's* depth
+    # of discharge, so the cell model's loss term appeared in the numerator and the
+    # denominator at the same depth and cancelled exactly. c_deg then reduced to a
+    # closed form containing no cell model at all — two cell models whose loss per
+    # cycle differs by a factor of 11.6 returned identical values to nine decimals,
+    # and the apparent depth response was just the 1/dod normalisation at the end of
+    # base_cost. Pinning the reference restores a real depth response.
+    REF_DOD, REF_C_RATE, REF_T_KELVIN = 0.9, 0.5, 298.15
+
+    def anchor_factor(self) -> float:
+        """Scale that reconciles the cell model with observed field loss.
+
+        Defined at the reference operating point only, so that departures from it
+        carry the cell model's response while the level stays pinned to the field.
+        """
         if self.field_annual_loss is None:
             return 1.0
-        modelled = self.loss_per_efc(dod=dod) * self.field_efc_per_year
+        modelled = self.loss_per_efc(self.REF_DOD, self.REF_C_RATE,
+                                     self.REF_T_KELVIN) * self.field_efc_per_year
         return float(self.field_annual_loss / max(modelled, 1e-12))
 
     def base_cost(self, dod: float = 0.9, c_rate: float = 0.5, t_kelvin: float = 298.15) -> float:
         """c_deg in currency per MWh of throughput, before service differentiation."""
-        loss = self.loss_per_efc(dod, c_rate, t_kelvin) * self.anchor_factor(dod)
+        loss = self.loss_per_efc(dod, c_rate, t_kelvin) * self.anchor_factor()
         usable = 1.0 - self.eol_fraction
         disc = 1.0 / (1.0 + self.discount_rate) ** self.expected_life_years
         # cost of consuming `loss` of the usable life, per full cycle, spread over

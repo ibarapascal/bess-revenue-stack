@@ -1,5 +1,9 @@
 __pycache__/
 *.pyc
-data/
 .DS_Store
 .venv/
+# Cached market data only. Anchored with a leading slash: a bare `data/` matches
+# at any depth and silently swallows src/bess/data/, which every script imports —
+# invisible locally because the files are already on disk.
+/data/
+/results/*.parquet
