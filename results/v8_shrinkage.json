@@ -1,0 +1,39 @@
+{
+  "depth_k_half_hours": 4,
+  "days": 670,
+  "window": [
+    "2024-03-01",
+    "2025-12-31"
+  ],
+  "definition": "daily spread = mean of the k highest prices minus mean of the k lowest, k=4 half-hours, which is roughly the depth this 2-hour asset moves in one direction per cycle",
+  "finding": "the median forecast's daily spread averages 40.51 against a realised 64.84 (ratio 0.625), and its day-to-day standard deviation is 0.251 of the realised one. Persistence, a worse forecast by MAE but an actual price path, is undistorted at 1.0 and 1.0 \u2014 so the compression is a property of conditional-mean forecasting, not of forecasting",
+  "table": [
+    {
+      "series": "realised",
+      "mean_daily_spread_GBP_per_MWh": 64.84,
+      "sd_daily_spread": 56.56,
+      "ratio_of_means_to_realised": 1.0,
+      "ratio_of_sds_to_realised": 1.0,
+      "median_daily_ratio_to_realised": 1.0,
+      "days_narrower_than_realised_pct": 0.0
+    },
+    {
+      "series": "q50",
+      "mean_daily_spread_GBP_per_MWh": 40.51,
+      "sd_daily_spread": 14.22,
+      "ratio_of_means_to_realised": 0.625,
+      "ratio_of_sds_to_realised": 0.251,
+      "median_daily_ratio_to_realised": 0.693,
+      "days_narrower_than_realised_pct": 77.9
+    },
+    {
+      "series": "persistence",
+      "mean_daily_spread_GBP_per_MWh": 64.84,
+      "sd_daily_spread": 56.57,
+      "ratio_of_means_to_realised": 1.0,
+      "ratio_of_sds_to_realised": 1.0,
+      "median_daily_ratio_to_realised": 0.978,
+      "days_narrower_than_realised_pct": 51.9
+    }
+  ]
+}

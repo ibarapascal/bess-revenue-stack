@@ -284,6 +284,31 @@ def check_published_numbers():
           f"aux {zero['error_from_aux_GBP']:+,}, curve {zero['error_from_curve_shape_GBP']:+,} "
           f"at zero thermal load")
 
+    # The level/shape split only means anything if it decomposes v3's own curve term
+    # rather than being a separate measurement that happens to look similar. That is an
+    # identity, so it can be asserted exactly, and it is the first thing a change to
+    # either script would break.
+    if (res / "v5_level_shape.json").exists():
+        v5 = load("v5_level_shape.json")
+        z5 = v5["table"][0]
+        check("the level/shape split still decomposes v3's curve term",
+              abs((z5["level_effect_GBP"] + z5["shape_effect_GBP"])
+                  + zero["error_from_curve_shape_GBP"]) < 2,
+              f"level {z5['level_effect_GBP']:+,} + shape {z5['shape_effect_GBP']:+,} "
+              f"= {-zero['error_from_curve_shape_GBP']:+,}")
+        # The endpoints must *be* v3's arms, not merely resemble them: the flat arm is
+        # v3's `with_aux` and the curve arm is v3's `actual`. If either drifts, the split
+        # is decomposing something else and the identity above would still pass.
+        check("the split's endpoints are v3's own arms",
+              z5["flat_0p90_net_GBP"] == zero["with_aux_net_GBP"]
+              and z5["curve_net_GBP"] == zero["actual_net_GBP"],
+              f"flat {z5['flat_0p90_net_GBP']:,} = with_aux {zero['with_aux_net_GBP']:,}; "
+              f"curve {z5['curve_net_GBP']:,} = actual {zero['actual_net_GBP']:,}")
+        check("load-dependence is still the minority term",
+              abs(z5["shape_effect_GBP"]) < abs(z5["level_effect_GBP"]),
+              f"shape {z5['shape_effect_GBP']:+,} against level {z5['level_effect_GBP']:+,} "
+              f"— the direction is the finding, the share is not pinned")
+
     v4 = load("v4_service_cdeg.json")
     lowest = v4["deltas_vs_flat"][0]
     check("service differentiation still raises reserve holdings",
@@ -297,6 +322,61 @@ def check_published_numbers():
     check("the generated finding text matches the data it was generated from",
           claims_flip == lowest["enters_market_only_when_differentiated"],
           "narrative and numbers agree on whether participation flips")
+
+    # A bootstrap interval that does not contain its own point estimate is the signature
+    # of the numerator and the denominator being computed on different bases — the point
+    # estimate from one definition and the resample from another. It is silent, it looks
+    # entirely plausible, and nothing else here would catch it.
+    if (res / "v7_bootstrap.json").exists():
+        v7 = load("v7_bootstrap.json")
+        bad = [r["quantity"] for r in v7["table"]
+               if not (r["ci95_lo"] <= r["point"] <= r["ci95_hi"])]
+        check("every bootstrap interval contains its own point estimate",
+              not bad, f"{len(v7['table'])} quantities checked"
+                       + (f" — outside: {bad}" if bad else ""))
+        # The longer block is a robustness check, so it must not be reported as if it
+        # agreed when it does not: assert the two block lengths overlap at all.
+        disjoint = [r["quantity"] for r in v7["table"]
+                    if r["ci95_hi"] < r["ci95_lo_28d"] or r["ci95_lo"] > r["ci95_hi_28d"]]
+        check("the 7-day and 28-day intervals overlap",
+              not disjoint, "block length is a nuisance parameter here; disjoint "
+                            "intervals would mean the choice is driving the answer"
+                            + (f" — disjoint: {disjoint}" if disjoint else ""))
+
+    if (res / "v8_stochastic.json").exists():
+        v8 = load("v8_stochastic.json")
+        arms8 = {r["arm"]: r for r in v8["table"]}
+        pf8 = arms8["perfect foresight"]["net_GBP"]
+        below = all(r["net_GBP"] < pf8 for a, r in arms8.items()
+                    if a != "perfect foresight")
+        check("every v8 arm stays below the perfect-foresight bound",
+              below, "settlement is on realised prices, so no program may beat foresight")
+        # The README reads the architecture gain as ~zero. If a rerun made it large, the
+        # 'shortfall is the forecast' section would be stale in the direction that
+        # matters most, so the magnitude is pinned loosely rather than exactly.
+        gain8 = abs(v8["decomposition"]["architecture_gain_pct_points"])
+        check("the two-stage architecture gain remains small (<5 pp)",
+              gain8 < 5.0, f"gain {gain8:.2f} pp against the deterministic mean-path arm")
+        cov8 = [c["empirical_coverage"] for c in v8["calibration"]]
+        check("quantile coverage is monotone in the nominal level",
+              all(a < b for a, b in zip(cov8, cov8[1:])),
+              "crossed quantiles would make the scenario set incoherent")
+
+    # The shrinkage result is what explains the throughput anomaly, and it only means
+    # anything relative to a control: persistence is a worse forecast that is nonetheless
+    # an actual price path, so its width must come out right. If both series shrank, the
+    # cause would be the measurement rather than conditional-mean forecasting.
+    if (res / "v8_shrinkage.json").exists():
+        sh = {r["series"]: r for r in load("v8_shrinkage.json")["table"]}
+        check("the conditional forecast is narrower than the prices it predicts",
+              sh["q50"]["ratio_of_means_to_realised"] < 1.0
+              and sh["q50"]["ratio_of_sds_to_realised"] < 1.0,
+              f"q50 spread {sh['q50']['ratio_of_means_to_realised']:.3f} of realised, "
+              f"sd {sh['q50']['ratio_of_sds_to_realised']:.3f}")
+        check("the persistence control is not narrowed",
+              abs(sh["persistence"]["ratio_of_means_to_realised"] - 1.0) < 0.02,
+              f"{sh['persistence']['ratio_of_means_to_realised']:.3f} — an actual price "
+              f"path shifted a day must keep its width, or the metric is at fault")
 
 
 def main():

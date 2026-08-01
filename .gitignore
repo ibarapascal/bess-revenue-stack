@@ -11,3 +11,6 @@ __pycache__/
 # Internal working context: machine names, local paths, strategy notes.
 # Not for publication.
 CLAUDE.md
+.worklog.md
+.learning-draft-*.md
+.review-final.md

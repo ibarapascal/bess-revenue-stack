@@ -1,0 +1,5 @@
+hvac_MW,flat_0p90_net_GBP,flat_matched_net_GBP,curve_net_GBP,level_effect_GBP,shape_effect_GBP,total_GBP,shape_share_of_total_pct,delivered_frac_flat,delivered_frac_matched,delivered_frac_curve,throughput_flat_MWh,throughput_curve_MWh
+0.0,2728226,3017556,3021326,289330,3771,293101,1.3,1.0,1.0,1.0,82965,82965
+0.05,2666549,2955879,2959650,289330,3771,293101,1.3,1.0,1.0,1.0,82965,82965
+0.1,2604873,2894202,2897973,289330,3771,293101,1.3,1.0,1.0,1.0,82965,82965
+0.2,2481519,2770849,2774620,289330,3771,293101,1.3,1.0,1.0,1.0,82965,82965

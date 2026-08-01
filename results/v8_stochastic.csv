@@ -1,0 +1,6 @@
+arm,net_GBP,capture_net_pct,efc_per_year
+perfect foresight,2930400,100.0,450.8
+"deterministic, q50",1569595,53.6,383.5
+"deterministic, mean of quantiles",1597019,54.5,369.2
+"two-stage scenario, risk neutral",1599174,54.6,370.5
+"two-stage scenario, CVaR 0.5",1590696,54.3,344.9

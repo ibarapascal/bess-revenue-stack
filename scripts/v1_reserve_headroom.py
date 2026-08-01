@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import json
 import sys
+from datetime import date
 from pathlib import Path
 
 import numpy as np
@@ -30,7 +31,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from bess.data.elexon import load_prices
+from bess.data.elexon import market_index
 from bess.degradation.blast_lfp import DegradationCost
 from bess.optimise.dispatch import Battery, DispatchConfig, run_backtest
 
@@ -39,7 +40,11 @@ OUT = Path(__file__).resolve().parents[1] / "results"
 
 def main(start: str, end: str):
     OUT.mkdir(exist_ok=True)
-    df = load_prices(start, end).dropna(subset=["price"]).reset_index(drop=True)
+    # Wholesale price only; the reserve price below is synthetic. An earlier version
+    # called load_prices, which also fetches imbalance settlement prices day by day —
+    # roughly 670 requests over this window for two columns nothing reads.
+    df = market_index(date.fromisoformat(start),
+                      date.fromisoformat(end)).dropna(subset=["price"]).reset_index(drop=True)
 
     dc = DegradationCost(cell_model="prismatic_250ah")   # Italian field pair: 1.37 %/yr at 118.7 EFC/yr
     c_arb, c_fr = dc.cost("arbitrage"), dc.cost("frequency")

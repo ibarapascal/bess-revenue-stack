@@ -1,0 +1,4 @@
+duration_h,energy_mwh,mean_discharge_load_frac,matched_round_trip,flat_round_trip,level_effect_GBP,shape_effect_GBP,total_curve_term_GBP,shape_share_of_total_pct,conventional_net_GBP,curve_net_GBP,overstatement_pct_no_thermal,aware_net_GBP,recovered_by_modelling_pct,aware_discharge_load_frac,efc_per_year_conventional,efc_per_year_no_deg_cost,no_deg_net_GBP,deg_overstatement_pct,GBP_per_MW_yr_conventional
+1.0,50.0,0.832,0.965,0.9025,164046,2723,166769,1.6,1632288,1684512,-3.1,1753162,4.1,0.89,501.7,977.7,2356797,44.4,17732
+2.0,100.0,0.856,0.964,0.9025,289330,3771,293101,1.3,2934034,3021326,-2.9,3147798,4.2,0.895,450.6,729.2,4169625,42.1,31873
+4.0,200.0,0.966,0.9629,0.9025,452112,3032,455145,0.7,4784793,4930399,-3.0,5122287,3.9,0.968,369.1,555.8,6794825,42.0,51978

@@ -1,0 +1,91 @@
+{
+  "optimiser_channel": {
+    "flat_0p90_program_settled_on_curve_GBP": 3021326,
+    "flat_matched_program_settled_on_curve_GBP": 3134669,
+    "curve_program_GBP": 3147798,
+    "optimiser_level_effect_GBP": 113343,
+    "optimiser_shape_effect_GBP": 13129,
+    "optimiser_total_GBP": 126472,
+    "optimiser_total_pct": 4.2,
+    "optimiser_shape_share_pct": 10.4,
+    "discharge_load_frac_flat_program": 0.856,
+    "discharge_load_frac_matched_program": 0.882,
+    "discharge_load_frac_curve_program": 0.895
+  },
+  "window": [
+    "2024-03-01",
+    "2026-01-01"
+  ],
+  "battery": "50 MW / 100 MWh (2 h)",
+  "flat_round_trip_conventional": 0.9025,
+  "curve_round_trip_at_rated": 0.937,
+  "matched_round_trip": {
+    "eta_charge": 0.9815,
+    "eta_discharge": 0.9822,
+    "round_trip": 0.964
+  },
+  "mean_discharge_load_frac": 0.856,
+  "decomposition_note": "one schedule, three settlements, identical clipping and auxiliary treatment. level = flat-matched minus flat-0.9025; shape = curve minus flat-matched. With the schedule fixed, energy revenue does not depend on the loss model except through clipping, so a level difference is the only channel a constant-efficiency change can act through",
+  "table": [
+    {
+      "hvac_MW": 0.0,
+      "flat_0p90_net_GBP": 2728226,
+      "flat_matched_net_GBP": 3017556,
+      "curve_net_GBP": 3021326,
+      "level_effect_GBP": 289330,
+      "shape_effect_GBP": 3771,
+      "total_GBP": 293101,
+      "shape_share_of_total_pct": 1.3,
+      "delivered_frac_flat": 1.0,
+      "delivered_frac_matched": 1.0,
+      "delivered_frac_curve": 1.0,
+      "throughput_flat_MWh": 82965,
+      "throughput_curve_MWh": 82965
+    },
+    {
+      "hvac_MW": 0.05,
+      "flat_0p90_net_GBP": 2666549,
+      "flat_matched_net_GBP": 2955879,
+      "curve_net_GBP": 2959650,
+      "level_effect_GBP": 289330,
+      "shape_effect_GBP": 3771,
+      "total_GBP": 293101,
+      "shape_share_of_total_pct": 1.3,
+      "delivered_frac_flat": 1.0,
+      "delivered_frac_matched": 1.0,
+      "delivered_frac_curve": 1.0,
+      "throughput_flat_MWh": 82965,
+      "throughput_curve_MWh": 82965
+    },
+    {
+      "hvac_MW": 0.1,
+      "flat_0p90_net_GBP": 2604873,
+      "flat_matched_net_GBP": 2894202,
+      "curve_net_GBP": 2897973,
+      "level_effect_GBP": 289330,
+      "shape_effect_GBP": 3771,
+      "total_GBP": 293101,
+      "shape_share_of_total_pct": 1.3,
+      "delivered_frac_flat": 1.0,
+      "delivered_frac_matched": 1.0,
+      "delivered_frac_curve": 1.0,
+      "throughput_flat_MWh": 82965,
+      "throughput_curve_MWh": 82965
+    },
+    {
+      "hvac_MW": 0.2,
+      "flat_0p90_net_GBP": 2481519,
+      "flat_matched_net_GBP": 2770849,
+      "curve_net_GBP": 2774620,
+      "level_effect_GBP": 289330,
+      "shape_effect_GBP": 3771,
+      "total_GBP": 293101,
+      "shape_share_of_total_pct": 1.3,
+      "delivered_frac_flat": 1.0,
+      "delivered_frac_matched": 1.0,
+      "delivered_frac_curve": 1.0,
+      "throughput_flat_MWh": 82965,
+      "throughput_curve_MWh": 82965
+    }
+  ]
+}

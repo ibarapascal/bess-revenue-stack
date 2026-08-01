@@ -1,0 +1,87 @@
+{
+  "window": [
+    "2024-01-01",
+    "2025-12-31"
+  ],
+  "battery": "50 MW / 100 MWh (2 h)",
+  "quantiles": [
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    0.9
+  ],
+  "scenario_weights": "equal",
+  "calibration": [
+    {
+      "quantile": 0.1,
+      "empirical_coverage": 0.19402011922503726,
+      "pinball_loss": 6.003134026980816,
+      "mean_level": 59.14198874035431
+    },
+    {
+      "quantile": 0.25,
+      "empirical_coverage": 0.29405737704918034,
+      "pinball_loss": 8.561072822798554,
+      "mean_level": 68.77333603679351
+    },
+    {
+      "quantile": 0.5,
+      "empirical_coverage": 0.4491741182314953,
+      "pinball_loss": 9.20490864668015,
+      "mean_level": 77.39993247577416
+    },
+    {
+      "quantile": 0.75,
+      "empirical_coverage": 0.6431321410829608,
+      "pinball_loss": 7.304618160896247,
+      "mean_level": 86.80468985464279
+    },
+    {
+      "quantile": 0.9,
+      "empirical_coverage": 0.7792784401390959,
+      "pinball_loss": 4.620327818691167,
+      "mean_level": 96.19236961762554
+    }
+  ],
+  "decomposition": {
+    "deterministic_capture_pct": 54.5,
+    "scenario_capture_pct": 54.6,
+    "architecture_gain_pct_points": 0.07,
+    "remaining_shortfall_pct_points": 45.4
+  },
+  "prediction_stated_before_running": "with a risk-neutral linear objective the first-stage revenue term collapses to the mean forecast path, so the two-stage program can differ from a mean-forecast deterministic one only through the recourse structure; a small gain is the expected result",
+  "scenario_set_limitation": "pointwise quantile paths are comonotone \u2014 q10 is low in every period at once \u2014 whereas real uncertainty reshuffles which periods are cheap. The scenario set therefore understates the diversity of futures and the recourse value measured against it is a lower bound",
+  "table": [
+    {
+      "arm": "perfect foresight",
+      "net_GBP": 2930400,
+      "capture_net_pct": 100.0,
+      "efc_per_year": 450.8
+    },
+    {
+      "arm": "deterministic, q50",
+      "net_GBP": 1569595,
+      "capture_net_pct": 53.6,
+      "efc_per_year": 383.5
+    },
+    {
+      "arm": "deterministic, mean of quantiles",
+      "net_GBP": 1597019,
+      "capture_net_pct": 54.5,
+      "efc_per_year": 369.2
+    },
+    {
+      "arm": "two-stage scenario, risk neutral",
+      "net_GBP": 1599174,
+      "capture_net_pct": 54.6,
+      "efc_per_year": 370.5
+    },
+    {
+      "arm": "two-stage scenario, CVaR 0.5",
+      "net_GBP": 1590696,
+      "capture_net_pct": 54.3,
+      "efc_per_year": 344.9
+    }
+  ]
+}

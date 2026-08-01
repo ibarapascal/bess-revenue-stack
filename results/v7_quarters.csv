@@ -1,0 +1,121 @@
+quantity,quarter,days,value
+"deg overstatement, italian c_deg",2024Q1,31,76.37423986667515
+"deg overstatement, italian c_deg",2024Q2,91,50.90417306962662
+"deg overstatement, italian c_deg",2024Q3,92,49.94635064943604
+"deg overstatement, italian c_deg",2024Q4,92,34.24715334158002
+"deg overstatement, italian c_deg",2025Q1,90,32.22890683975592
+"deg overstatement, italian c_deg",2025Q2,91,37.88087808223884
+"deg overstatement, italian c_deg",2025Q3,92,44.05097382788601
+"deg overstatement, italian c_deg",2025Q4,92,43.57334476616161
+"deg overstatement, german c_deg",2024Q1,31,155.19713872739808
+"deg overstatement, german c_deg",2024Q2,91,100.37078923322808
+"deg overstatement, german c_deg",2024Q3,92,92.43271360854703
+"deg overstatement, german c_deg",2024Q4,92,60.888315712162225
+"deg overstatement, german c_deg",2025Q1,90,59.91601739703203
+"deg overstatement, german c_deg",2025Q2,91,70.24049494549278
+"deg overstatement, german c_deg",2025Q3,92,82.44393198587623
+"deg overstatement, german c_deg",2025Q4,92,83.0056132149351
+headroom overstatement @ GBP2/MW/h,2024Q1,31,16.789080378103694
+headroom overstatement @ GBP2/MW/h,2024Q2,91,13.81743367838637
+headroom overstatement @ GBP2/MW/h,2024Q3,92,14.702341330977697
+headroom overstatement @ GBP2/MW/h,2024Q4,92,14.612047197938093
+headroom overstatement @ GBP2/MW/h,2025Q1,90,13.108829222970297
+headroom overstatement @ GBP2/MW/h,2025Q2,91,12.669550681735808
+headroom overstatement @ GBP2/MW/h,2025Q3,92,13.9278825807438
+headroom overstatement @ GBP2/MW/h,2025Q4,92,15.658502704559751
+headroom overstatement @ GBP5/MW/h,2024Q1,31,11.596079425677441
+headroom overstatement @ GBP5/MW/h,2024Q2,91,13.90399239723379
+headroom overstatement @ GBP5/MW/h,2024Q3,92,14.734669510475594
+headroom overstatement @ GBP5/MW/h,2024Q4,92,16.608022857307514
+headroom overstatement @ GBP5/MW/h,2025Q1,90,14.608807231642018
+headroom overstatement @ GBP5/MW/h,2025Q2,91,16.286715800911345
+headroom overstatement @ GBP5/MW/h,2025Q3,92,13.739487089947389
+headroom overstatement @ GBP5/MW/h,2025Q4,92,14.1547247764491
+headroom overstatement @ GBP10/MW/h,2024Q1,31,4.350417514487326
+headroom overstatement @ GBP10/MW/h,2024Q2,91,7.916313673221564
+headroom overstatement @ GBP10/MW/h,2024Q3,92,7.755931775284575
+headroom overstatement @ GBP10/MW/h,2024Q4,92,9.740534590141547
+headroom overstatement @ GBP10/MW/h,2025Q1,90,8.412337967371064
+headroom overstatement @ GBP10/MW/h,2025Q2,91,10.750918362389017
+headroom overstatement @ GBP10/MW/h,2025Q3,92,8.023657656740536
+headroom overstatement @ GBP10/MW/h,2025Q4,92,7.031636171096811
+headroom overstatement @ GBP20/MW/h,2024Q1,31,0.8659003835554513
+headroom overstatement @ GBP20/MW/h,2024Q2,91,2.5388679484752874
+headroom overstatement @ GBP20/MW/h,2024Q3,92,2.5939414858959786
+headroom overstatement @ GBP20/MW/h,2024Q4,92,3.677673776993684
+headroom overstatement @ GBP20/MW/h,2025Q1,90,2.9502337102632836
+headroom overstatement @ GBP20/MW/h,2025Q2,91,4.349459962092106
+headroom overstatement @ GBP20/MW/h,2025Q3,92,3.047319863027642
+headroom overstatement @ GBP20/MW/h,2025Q4,92,2.2014387450604023
+"conventional overstatement, no thermal",2024Q1,31,-4.0519493303763365
+"conventional overstatement, no thermal",2024Q2,91,-2.122930158096792
+"conventional overstatement, no thermal",2024Q3,92,-2.6575198929556065
+"conventional overstatement, no thermal",2024Q4,92,-2.76609453041039
+"conventional overstatement, no thermal",2025Q1,90,-4.262824211351912
+"conventional overstatement, no thermal",2025Q2,91,-1.732145846782629
+"conventional overstatement, no thermal",2025Q3,92,-2.988515376853962
+"conventional overstatement, no thermal",2025Q4,92,-3.3262766089010576
+shape share of the efficiency term,2024Q1,31,1.0984226741707566
+shape share of the efficiency term,2024Q2,91,1.1272830722250238
+shape share of the efficiency term,2024Q3,92,1.375598288125521
+shape share of the efficiency term,2024Q4,92,1.189942042745643
+shape share of the efficiency term,2025Q1,90,1.3197126638079155
+shape share of the efficiency term,2025Q2,91,1.3024194902041055
+shape share of the efficiency term,2025Q3,92,1.359667969212406
+shape share of the efficiency term,2025Q4,92,1.3650765006399848
+service-differentiation gain @ GBP2/MW/h,2024Q1,31,11.772155902646375
+service-differentiation gain @ GBP2/MW/h,2024Q2,91,7.776147633890895
+service-differentiation gain @ GBP2/MW/h,2024Q3,92,7.617689503484049
+service-differentiation gain @ GBP2/MW/h,2024Q4,92,5.463300344082911
+service-differentiation gain @ GBP2/MW/h,2025Q1,90,4.793524596436605
+service-differentiation gain @ GBP2/MW/h,2025Q2,91,4.831087561125935
+service-differentiation gain @ GBP2/MW/h,2025Q3,92,7.582612417327805
+service-differentiation gain @ GBP2/MW/h,2025Q4,92,9.595742646547611
+service-differentiation gain @ GBP5/MW/h,2024Q1,31,10.18293926718814
+service-differentiation gain @ GBP5/MW/h,2024Q2,91,7.814800548366163
+service-differentiation gain @ GBP5/MW/h,2024Q3,92,8.363147457451303
+service-differentiation gain @ GBP5/MW/h,2024Q4,92,7.104661868233508
+service-differentiation gain @ GBP5/MW/h,2025Q1,90,6.59599538832123
+service-differentiation gain @ GBP5/MW/h,2025Q2,91,6.446848469171829
+service-differentiation gain @ GBP5/MW/h,2025Q3,92,7.944202811805212
+service-differentiation gain @ GBP5/MW/h,2025Q4,92,8.809781229774604
+service-differentiation gain @ GBP10/MW/h,2024Q1,31,5.650352456899954
+service-differentiation gain @ GBP10/MW/h,2024Q2,91,5.209597843893632
+service-differentiation gain @ GBP10/MW/h,2024Q3,92,5.1759702836866595
+service-differentiation gain @ GBP10/MW/h,2024Q4,92,4.830348878059221
+service-differentiation gain @ GBP10/MW/h,2025Q1,90,4.615947609377979
+service-differentiation gain @ GBP10/MW/h,2025Q2,91,4.757879601611914
+service-differentiation gain @ GBP10/MW/h,2025Q3,92,5.082218336772515
+service-differentiation gain @ GBP10/MW/h,2025Q4,92,5.317455631339518
+"net capture, gbm",2024Q1,31,36.612838689875765
+"net capture, gbm",2024Q2,91,36.741727923167375
+"net capture, gbm",2024Q3,92,38.29566292942733
+"net capture, gbm",2024Q4,92,63.133099478426736
+"net capture, gbm",2025Q1,90,46.02104025207187
+"net capture, gbm",2025Q2,91,46.8309435863018
+"net capture, gbm",2025Q3,92,53.035674944314174
+"net capture, gbm",2025Q4,92,56.063590953394346
+"gross capture, gbm",2024Q1,31,48.67494213438272
+"gross capture, gbm",2024Q2,91,50.249723844950346
+"gross capture, gbm",2024Q3,92,54.83034992046196
+"gross capture, gbm",2024Q4,92,70.89431986053278
+"gross capture, gbm",2025Q1,90,57.4896290248208
+"gross capture, gbm",2025Q2,91,59.353810759446404
+"gross capture, gbm",2025Q3,92,64.70907536898984
+"gross capture, gbm",2025Q4,92,66.70229973179104
+"net capture, persistence",2024Q1,31,17.659162976426636
+"net capture, persistence",2024Q2,91,19.438591934633372
+"net capture, persistence",2024Q3,92,28.217895690956908
+"net capture, persistence",2024Q4,92,54.98698940740246
+"net capture, persistence",2025Q1,90,41.19924449784674
+"net capture, persistence",2025Q2,91,39.04481431465258
+"net capture, persistence",2025Q3,92,39.84986055503735
+"net capture, persistence",2025Q4,92,46.642980498121325
+"gross capture, persistence",2024Q1,31,47.22032931624826
+"gross capture, persistence",2024Q2,91,42.58682073740586
+"gross capture, persistence",2024Q3,92,48.362105825256144
+"gross capture, persistence",2024Q4,92,64.66397052670997
+"gross capture, persistence",2025Q1,90,54.00742164766851
+"gross capture, persistence",2025Q2,91,53.843350514807476
+"gross capture, persistence",2025Q3,92,55.64704362281936
+"gross capture, persistence",2025Q4,92,61.113240488165
