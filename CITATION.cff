@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "BESS revenue stack: what common modelling shortcuts cost, measured on GB market data"
+type: software
+authors:
+  - family-names: "Jing"
+    given-names: "Jiawei"
+    affiliation: "Makuhari Development Corporation"
+repository-code: "https://github.com/ibarapascal/bess-revenue-stack"
+license: MIT
+keywords:
+  - battery energy storage
+  - BESS
+  - energy arbitrage
+  - degradation
+  - power markets
+  - Great Britain
+abstract: >-
+  Measures how much five common modelling shortcuts overstate grid-scale
+  battery revenue, one at a time, on a 50 MW / 100 MWh asset priced against
+  Elexon half-hourly GB market data from March 2024 to January 2026. Pricing
+  wear at zero overstates net revenue by 42-78 percent; omitting state-of-charge
+  headroom for reserve by 3-15 percent; a real forecast captures 60 percent of
+  gross margin but only 48 percent of net. A single flat round-trip efficiency
+  turns out to contain two errors of opposite sign that largely cancel, and a
+  single wear price across services shifts reserve holdings by 0.3-6.2 MW. Every
+  finding is measured on the same asset over the same window.
