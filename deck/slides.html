@@ -1,0 +1,373 @@
+<!doctype html>
+<!--
+  BESS revenue stack — English deck (report-deck format, 780x540pt)
+  Numbers come from ../results/*; figures from deck/fig/ (make_figures.py).
+  Render: ./render.sh slides.html out/bess-revenue-stack-en.pdf
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>BESS revenue stack — what four modelling shortcuts cost</title>
+  <link rel="stylesheet" href="deck.css">
+  <style>
+    .photo-credit-b { position:absolute; right:10pt; bottom:6pt; font-size:7pt; color:#fff; opacity:.8; }
+    table.src { width:100%; border-collapse:collapse; font-size:10pt; }
+    table.src th { text-align:left; font-weight:700; color:var(--gray-dark);
+                   border-bottom:0.75pt solid var(--gray-line); padding:4pt 6pt; }
+    table.src td { padding:6pt; vertical-align:top; line-height:1.45;
+                   border-bottom:0.5pt solid var(--gray-panel); }
+    .summary { font-size:10.5pt; line-height:1.5; width:100%; border-collapse:collapse; }
+    .summary td { padding:7pt 8pt; vertical-align:top; }
+    .summary td.n { color:#fff; background:var(--blue-deep); font-weight:700;
+                    width:20pt; text-align:center; }
+    .summary tr.hi td.n { background:var(--red-alert); }
+    .summary td.cost { font-weight:700; color:var(--blue-primary); white-space:nowrap; }
+    .summary tr.hi td.cost { color:var(--red-alert); }
+    .summary tr:nth-child(even) td { background:var(--gray-panel); }
+  </style>
+</head>
+<body class="en">
+
+<!-- ============ Cover ============ -->
+<section class="slide">
+  <div class="cover-photo"><img src="img/cover.jpg" style="object-position:50% 34%;" alt=""></div>
+  <div class="photo-credit">Photo: Leslie Battery Storage, Fife — Bill Kasman / CC BY-SA 2.0</div>
+  <div class="cover-band" style="top:56pt;"><h1>What four modelling shortcuts cost
+a grid battery's revenue forecast</h1></div>
+  <div class="cover-bar">
+    <div class="org">Open research&nbsp;&nbsp;bess-revenue-stack</div>
+    <div class="date">August 2026</div>
+    <div class="cc">50 MW / 100 MWh on GB half-hourly prices, March 2024 – January 2026 (672 execution days)</div>
+  </div>
+</section>
+
+<!-- ============ Summary ============ -->
+<section class="slide">
+  <div class="headline">Four ordinary shortcuts inflate revenue by three to four times
+Degradation pricing dominates; the efficiency curve is innocent</div>
+  <div class="subtitle">The five results</div>
+  <div class="body" style="top:110pt; height:352pt; display:block;">
+    <table class="summary" style="height:100%;">
+      <tr class="hi">
+        <td class="n">1</td>
+        <td style="width:210pt;"><b>Pricing wear at zero</b></td>
+        <td>Implies 729 full cycles a year against the 346–451 a wear-aware schedule chooses</td>
+        <td class="cost">overstates 42–78%</td>
+      </tr>
+      <tr>
+        <td class="n">2</td>
+        <td><b>No state-of-charge headroom for reserve</b></td>
+        <td>At £2/MW/h it commits 40.1 MW of reserve against 26.5 MW it could deliver</td>
+        <td class="cost">overstates 3–15%</td>
+      </tr>
+      <tr class="hi">
+        <td class="n">3</td>
+        <td><b>Assuming you can forecast</b></td>
+        <td>A real forecast captures 60% of gross margin but only 48% of net — the gap widens as wear is priced higher</td>
+        <td class="cost">costs 40–52%</td>
+      </tr>
+      <tr>
+        <td class="n">4</td>
+        <td><b>One flat round-trip efficiency</b></td>
+        <td>The two errors inside it have opposite signs and mostly cancel; what remains is the auxiliary load, not the curve</td>
+        <td class="cost">−2.9% to +5.7%</td>
+      </tr>
+      <tr>
+        <td class="n">5</td>
+        <td><b>One wear price for every service</b></td>
+        <td>Peak-shifting ages a cell 1.8–1.9× faster than frequency response at equal throughput</td>
+        <td class="cost">shifts net 5.0–7.6%</td>
+      </tr>
+    </table>
+  </div>
+  <div class="readout">Findings 1, 2, 4 and 5 compare two arms under perfect foresight — an unreachable bound used because both arms share it
+Finding 3 is the one that measures what losing that foresight costs</div>
+  <div class="page-no">1</div>
+</section>
+
+<!-- ============ Method ============ -->
+<section class="slide">
+  <div class="headline">One asset, one market, one window — so no finding gets
+its own flattering quarter</div>
+  <div class="subtitle">What is modelled, and what is not</div>
+  <div class="source">Source: Elexon Insights (MID / APXMIDP), fetched at reproduce time</div>
+  <div class="body" style="gap:14pt;">
+    <div style="flex:1;">
+      <div style="background:var(--blue-primary); color:#fff; font-size:11.5pt; font-weight:700;
+                  padding:4pt 10pt;">Modelled</div>
+      <table class="matrix" style="margin-top:8pt; font-size:10.5pt; height:auto;">
+        <tr><td class="rowhead" style="width:96pt;">Asset</td>
+            <td>50 MW / 100 MWh lithium-iron-phosphate, 2 h duration<br>1 h and 4 h tested for finding 4</td></tr>
+        <tr><td class="rowhead">Market</td>
+            <td>GB wholesale, half-hourly reference price<br>plus a synthetic reserve-price sweep</td></tr>
+        <tr><td class="rowhead">Window</td>
+            <td>1 March 2024 – 1 January 2026<br><b>672 execution days</b>, one window for every finding</td></tr>
+        <tr><td class="rowhead">Degradation</td>
+            <td>Power-law calendar and cycle ageing, anchored to a field plant's measured loss over its own life</td></tr>
+      </table>
+    </div>
+    <div style="flex:1;">
+      <div style="background:var(--gray-dark); color:#fff; font-size:11.5pt; font-weight:700;
+                  padding:4pt 10pt;">Not modelled</div>
+      <table class="matrix" style="margin-top:8pt; font-size:10.5pt; height:auto;">
+        <tr><td class="rowhead" style="width:96pt; border-color:var(--gray-dark); color:var(--gray-dark);">Day-ahead auction</td>
+            <td>The strategy is indexed to the half-hourly reference price; a real battery also trades the auction, where forecast error costs far less</td></tr>
+        <tr><td class="rowhead" style="border-color:var(--gray-dark); color:var(--gray-dark);">Real reserve prices</td>
+            <td>The reserve sweep is synthetic, not market data</td></tr>
+        <tr><td class="rowhead" style="border-color:var(--gray-dark); color:var(--gray-dark);">Network and fees</td>
+            <td>No use-of-system charges, no imbalance exposure</td></tr>
+        <tr><td class="rowhead" style="border-color:var(--gray-dark); color:var(--gray-dark);">Other assets</td>
+            <td>One asset in one market: the shortcuts are shown to be costly here, and shown to be common by citation</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="readout">Shorter windows in this dataset have wider spreads, so picking a quarter per finding would let each effect report itself at its best
+Running everything on one window turned out to strengthen the results rather than soften them</div>
+  <div class="page-no">2</div>
+</section>
+
+<!-- ============ Waterfall ============ -->
+<section class="slide">
+  <div class="headline has-tag">£3.93m of perfect-foresight margin leaves £1.42m
+Forecast error costs more; wear pricing sets the ratio</div>
+  <div class="tag">Headline</div>
+  <div class="subtitle">From the theoretical ceiling to the achievable number, on the forecast-driven case</div>
+  <div class="unit">Unit: £m over 22 months</div>
+  <div class="source">Source: v2_capture_rate, v0_arbitrage</div>
+  <div class="body with-readout"><img src="fig/waterfall.png" alt=""></div>
+  <div class="readout">This is a wholesale-only strategy indexed to the half-hourly price, so £1.42m is the achievable revenue of the forecast-dependent leg, not of the asset
+A model ignoring wear entirely would cycle 729 times a year and print £4.17m — the top bar already prices degradation</div>
+  <div class="footer-chapter"><span class="num">1</span>The stack</div>
+  <div class="page-no">3</div>
+</section>
+
+<!-- ============ Shortcut 1 ============ -->
+<section class="slide">
+  <div class="headline">Shortcut 1: pricing wear at zero overstates net by 42–78%
+The wear price has four inputs, and one of them is measured</div>
+  <div class="subtitle">Sensitivity of the cost of wear to its inputs, and what it does to the headline ratio</div>
+  <div class="unit">Unit: left £/MWh throughput, right ratio</div>
+  <div class="source">Source: v0_cdeg_inputs, v2_cdeg_band</div>
+  <div class="body with-readout"><img src="fig/cdeg.png" alt=""></div>
+  <div class="readout">Replacement cost, discount rate, assumed life and the end-of-life threshold each move the wear price by more than a third
+Only the ageing model itself is anchored to measurement — to a field plant that lost 4.1% of capacity over 356 equivalent full cycles in three years</div>
+  <div class="footer-chapter"><span class="num">2</span>The five shortcuts</div>
+  <div class="page-no">4</div>
+</section>
+
+<!-- ============ Shortcut 2 ============ -->
+<section class="slide">
+  <div class="headline">Shortcut 2: reserve sold without headroom cannot be delivered
+The error is 3–15%, largest where the reserve price is lowest</div>
+  <div class="subtitle">Reserve position and the resulting overstatement across the price sweep</div>
+  <div class="unit">Unit: left MW, right %</div>
+  <div class="source">Source: v1_reserve_headroom (reserve prices are a synthetic sweep, not market data)</div>
+  <div class="body with-readout"><img src="fig/headroom.png" alt=""></div>
+  <div class="readout">At a high reserve price the battery holds energy back anyway, because reserve outbids arbitrage — so the constraint stops binding
+The shortcut is therefore most dangerous in exactly the case a developer treats as conservative: a modest reserve price alongside an active arbitrage strategy</div>
+  <div class="footer-chapter"><span class="num">2</span>The five shortcuts</div>
+  <div class="page-no">5</div>
+</section>
+
+<!-- ============ Shortcut 3 ============ -->
+<section class="slide">
+  <div class="headline has-tag">Shortcut 3: a forecast gets 60% of gross but 48% of net
+The error lands on cycles you already paid wear for</div>
+  <div class="tag">Look here</div>
+  <div class="subtitle">Capture rate against perfect foresight, gross and net of the cost of wear</div>
+  <div class="unit">Unit: % of perfect foresight</div>
+  <div class="source">Source: v2_capture_rate</div>
+  <div class="body">
+    <div style="flex:1; display:flex; align-items:center;"><img src="fig/capture.png" alt=""></div>
+    <ul class="bullets" style="width:238pt;">
+      <li>Gradient boosting on lagged prices beats persistence on both measures, but the <b>gross-to-net gap widens</b>: 1.24× at the field-anchored wear price, 1.54× at the German one</li>
+      <li>The mechanism is not subtle. A mistimed cycle still consumes capacity, so the wear cost is paid whether or not the spread materialises</li>
+      <li>This is a claim about <b>degradation-aware models</b>, not about forecasting: at zero wear price the two capture rates coincide</li>
+      <li>Both predictors are deliberately naive — no weather, no outages, no fuel. A desk's forecast should beat them, which makes 48% a floor</li>
+    </ul>
+  </div>
+  <div class="footer-chapter"><span class="num">2</span>The five shortcuts</div>
+  <div class="page-no">6</div>
+</section>
+
+<!-- ============ Shortcut 4 ============ -->
+<section class="slide">
+  <div class="headline">Shortcut 4: flat efficiency holds two errors of opposite sign
+With no thermal load it reads 2.9% LOW, not high</div>
+  <div class="subtitle">Overstatement against thermal load, and the level / shape split of the efficiency term</div>
+  <div class="unit">Unit: left %, right £k</div>
+  <div class="source">Source: v3_converter_efficiency, v6_duration</div>
+  <div class="body with-readout"><img src="fig/efficiency.png" alt=""></div>
+  <div class="readout">The efficiency half is a <b>level</b> error, not a shape one: equalising the average leaves load dependence worth 0.7–1.6% of the term, at 1, 2 and 4 hours alike
+So the modelling effort belongs on where the auxiliaries are charged, not on resolving the converter curve — the opposite of where it usually goes</div>
+  <div class="footer-chapter"><span class="num">2</span>The five shortcuts</div>
+  <div class="page-no">7</div>
+</section>
+
+<!-- ============ Shortcut 5 ============ -->
+<section class="slide">
+  <div class="headline">Shortcut 5: one wear price for every service costs 5–8% of net
+Peak-shifting ages a cell 1.8–1.9× faster than reserve duty</div>
+  <div class="subtitle">Effect of differentiating the wear price by service, at a £2/MW/h reserve price</div>
+  <div class="unit">Unit: left MW, right % against a single flat price</div>
+  <div class="source">Source: v4_service_cdeg; ageing ratio from module tests on 220 Ah LFP under grid duty profiles</div>
+  <div class="body">
+    <div style="flex:1; display:flex; align-items:center;"><img src="fig/service.png" alt=""></div>
+    <ul class="bullets" style="width:238pt;">
+      <li>Charging frequency response at the arbitrage wear price makes reserve look more expensive than it is, so the optimiser under-commits by <b>0.3–6.2 MW</b></li>
+      <li>Correcting it cuts cycling by 5.8–8.6% and raises net revenue by <b>5.0–7.6%</b> — the same energy, priced by what it actually costs</li>
+      <li>It does <b>not</b> change whether the asset enters the reserve market at this wear price; at a higher one it would</li>
+      <li>The assumption underneath — damage proportional to throughput — is exactly what degradation physics is known to violate, and is flagged in the code rather than buried</li>
+    </ul>
+  </div>
+  <div class="footer-chapter"><span class="num">2</span>The five shortcuts</div>
+  <div class="page-no">8</div>
+</section>
+
+<!-- ============ Bootstrap ============ -->
+<section class="slide">
+  <div class="headline">Every headline survives a moving-block bootstrap of the window
+The degradation interval is the widest, and nowhere near zero</div>
+  <div class="subtitle">Point estimates with 95% intervals, resampling execution days in 7-day blocks (2,000 replicates)</div>
+  <div class="unit">Unit: %</div>
+  <div class="source">Source: v7_bootstrap</div>
+  <div class="body with-readout"><img src="fig/bootstrap.png" alt=""></div>
+  <div class="readout">Dispatch is solved once and the per-day results are resampled, so this measures sampling variation in the window — not uncertainty in the degradation model itself
+Quarter-to-quarter variation is wider than the bootstrap interval in every case, which is the honest bound on transporting these numbers to another period</div>
+  <div class="footer-chapter"><span class="num">3</span>Robustness</div>
+  <div class="page-no">9</div>
+</section>
+
+<!-- ============ What is different ============ -->
+<section class="slide">
+  <div class="headline">Three modelling choices behind these numbers, and their effect</div>
+  <div class="subtitle">Where this differs from the way battery revenue is usually modelled</div>
+  <div class="source">Source: repository documentation and the cited field measurements</div>
+  <div class="body" style="display:block;">
+    <table class="matrix" style="font-size:10.5pt; height:100%;">
+      <tr><th style="width:150pt;">Choice</th><th>What it means</th><th>What it changes</th></tr>
+      <tr>
+        <td class="rowhead">Ageing as a power law,<br>charged at the margin</td>
+        <td>Both ageing terms are power laws in their driver, with exponents below one, and only the cycle term enters the cost per MWh — calendar fade is a cost of ownership, not of trading</td>
+        <td>Read as linear rates, the same model predicts <b>67%</b> capacity loss over the field plant's first three years against <b>4.1%</b> measured. With the exponents applied, the field anchor is a 0.82 correction rather than a rescue</td>
+      </tr>
+      <tr>
+        <td class="rowhead">Auxiliaries separated<br>from the efficiency curve</td>
+        <td>The converter's load-independent loss is charged only when it runs; thermal management is modelled as power × time and swept over 0–0.2 MW</td>
+        <td>Stops the same energy being charged twice, which is what makes the sign of finding 4 readable at all</td>
+      </tr>
+      <tr>
+        <td class="rowhead">No API keys,<br>no manual downloads</td>
+        <td>The Elexon endpoints used need no key or registration; the client is self-contained and caches to parquet</td>
+        <td>One command reproduces every number from nothing. No market data is redistributed here</td>
+      </tr>
+    </table>
+  </div>
+  <div class="footer-chapter"><span class="num">4</span>Method</div>
+  <div class="page-no">10</div>
+</section>
+
+<!-- ============ Implications ============ -->
+<section class="slide">
+  <div class="headline">What to change in a revenue model, in order of what it is worth</div>
+  <div class="subtitle">The five findings as model changes</div>
+  <div class="source">Source: findings 1–5</div>
+  <div class="body" style="display:block;">
+    <table class="matrix" style="font-size:10.5pt; height:100%;">
+      <tr><th style="width:150pt;">Change</th><th>Why</th><th>Worth</th><th>Effort</th></tr>
+      <tr>
+        <td class="rowhead">Price wear per MWh<br>and put it in the objective</td>
+        <td>Without it the schedule cycles 729 times a year and the revenue line is a fiction</td>
+        <td><b>42–78%</b> of net revenue</td>
+        <td>One term in the objective, four inputs to defend</td>
+      </tr>
+      <tr>
+        <td class="rowhead">Apply a capture factor<br>to any perfect-foresight number</td>
+        <td>A real forecast reaches 48% of net, and the gap grows with the wear price</td>
+        <td><b>0.48–0.60</b> multiplier</td>
+        <td>None — it is a multiplier until you build the forecast</td>
+      </tr>
+      <tr>
+        <td class="rowhead">Constrain reserve by<br>deliverable state of charge</td>
+        <td>Otherwise the model sells reserve the asset cannot deliver, hardest to notice at low reserve prices</td>
+        <td><b>3–15%</b></td>
+        <td>One coupling constraint per period</td>
+      </tr>
+      <tr>
+        <td class="rowhead">Differentiate the wear price<br>by service</td>
+        <td>Peak-shifting ages the cell 1.8–1.9× faster than frequency response</td>
+        <td><b>5–8%</b></td>
+        <td>One extra coefficient</td>
+      </tr>
+      <tr>
+        <td class="rowhead">Model the auxiliary load —<br>not the converter curve</td>
+        <td>The curve's shape term is worth about 1% of the efficiency term; the standing draw is the rest</td>
+        <td><b>up to 5.7%</b>, sign depends on the auxiliaries</td>
+        <td>One binary per period</td>
+      </tr>
+    </table>
+  </div>
+  <div class="page-no">11</div>
+</section>
+
+<!-- ============ Disclaimer + sources ============ -->
+<section class="slide">
+  <div class="headline">How to read this, and where the data comes from</div>
+  <div class="body" style="gap:16pt; top:84pt; height:392pt;">
+    <div style="flex:0 0 268pt;">
+      <div style="background:var(--gray-dark); color:#fff; font-size:11.5pt; font-weight:700;
+                  padding:4pt 10pt;">How to read this</div>
+      <ul class="bullets" style="width:100%; margin-top:10pt; font-size:10.5pt;">
+        <li>This is a <b>controlled experiment on one asset in one market</b>, not a survey. The shortcuts are shown to be costly here, and shown to be common by citation</li>
+        <li>It is a study of modelling error, <b>not investment advice</b>, and not a revenue forecast for any asset</li>
+        <li>Reserve prices are a synthetic sweep. The wholesale strategy is indexed to the half-hourly reference price and excludes the day-ahead auction, where forecast error costs less</li>
+        <li>Every number is reproducible from the public repository, including the intermediate results and the verification script</li>
+      </ul>
+    </div>
+    <div style="flex:1;">
+      <div style="background:var(--blue-primary); color:#fff; font-size:11.5pt; font-weight:700;
+                  padding:4pt 10pt;">Sources</div>
+      <table class="src" style="margin-top:8pt; font-size:10pt; height:auto;">
+        <tr><th>Source</th><th>What</th><th>Used for</th></tr>
+        <tr><td>Elexon Insights</td><td>GB half-hourly reference price (MID / APXMIDP)</td><td>All dispatch and revenue</td></tr>
+        <tr><td>Field plant, southern Italy</td><td>Measured capacity loss over three years</td><td>Anchoring the ageing model</td></tr>
+        <tr><td>German systems, 8-year record</td><td>Upper degradation rate</td><td>The high-wear scenario</td></tr>
+        <tr><td>Converter measurements, 11 setpoints</td><td>AC round-trip efficiency curve</td><td>Finding 4</td></tr>
+        <tr><td>Module tests, 220 Ah LFP</td><td>Ageing under grid duty profiles</td><td>Finding 5</td></tr>
+      </table>
+      <div style="font-size:9.5pt; color:var(--gray-note); margin-top:9pt; line-height:1.5;">
+        No Elexon data is redistributed in the repository; each run fetches its own copy.
+        Full citations for the field measurements are in the repository README.
+      </div>
+    </div>
+  </div>
+  <div class="footer-chapter"><span class="num">5</span>Reference</div>
+  <div class="page-no">12</div>
+</section>
+
+<!-- ============ Back cover ============ -->
+<section class="slide">
+  <div class="half-photo"><img src="img/back.jpg" alt=""></div>
+  <div class="photo-credit-b">Photo: Adrian Pingstone / public domain</div>
+  <div class="contact-box" style="top:268pt; width:330pt; padding:14pt 18pt;">
+    <div class="label" style="font-size:11pt;">Contact</div>
+    <div style="font-size:14pt; font-weight:700; color:var(--blue-deep); line-height:1.5;">Makuhari Development Corporation</div>
+    <div style="font-size:10pt; color:var(--gray-dark); margin-bottom:9pt;">株式会社幕張開発</div>
+    <div style="font-size:11.5pt; color:var(--blue-primary); font-weight:700; line-height:1.5;">Jiawei Jing, President</div>
+    <div style="font-size:10.5pt; color:var(--gray-dark); line-height:1.65; margin-top:8pt;">
+      Mail: contact@mkhr.co.jp<br>
+      Web: mkhr.co.jp<br>
+      Makuhari Bay Park Cross Residence S2-1<br>
+      3-1-18 Wakaba, Mihama-ku, Chiba 261-0014, Japan
+    </div>
+  </div>
+  <div style="position:absolute; left:20pt; bottom:14pt; width:340pt; font-size:8.5pt;
+              color:var(--gray-note); line-height:1.55;">
+    Data and code: github.com/ibarapascal/bess-revenue-stack<br>
+    Companion report on the market side (JEPX, Japan): jepx-revenue-anatomy<br>
+    August 2026
+  </div>
+</section>
+
+</body>
+</html>

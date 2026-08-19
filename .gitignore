@@ -15,5 +15,7 @@ CLAUDE.md
 .learning-draft-*.md
 .review-final.md
 
-# deck 素材（未着手）
-deck/
+# deck: generated output and photographs (photographs are not redistributed)
+deck/out/
+deck/img/
+deck/__pycache__/

@@ -1,0 +1,48 @@
+# report-deck 用 matplotlib 主題（skills/report-deck-design.md §5 の実装）
+# 使い方: plt.style.use('scripts/report-deck/eesi.mplstyle')
+
+font.family:        Helvetica Neue, Arial, DejaVu Sans
+font.size:          10.5
+axes.titlesize:     11.5
+axes.labelsize:     11
+xtick.labelsize:    10.5
+ytick.labelsize:    10.5
+legend.fontsize:    10.5
+
+figure.dpi:         100
+savefig.dpi:        300
+savefig.bbox:       tight
+savefig.pad_inches: 0.01
+figure.facecolor:   white
+savefig.facecolor:  white
+
+axes.spines.top:    False
+axes.spines.right:  False
+axes.edgecolor:     CBD2D9
+axes.linewidth:     0.8
+axes.facecolor:     white
+axes.axisbelow:     True
+axes.titlelocation: left
+axes.titleweight:   bold
+
+axes.grid:          True
+axes.grid.axis:     y
+grid.color:         E4E9EF
+grid.linewidth:     0.8
+grid.linestyle:     -
+
+xtick.direction:    out
+ytick.direction:    out
+xtick.major.size:   2
+ytick.major.size:   2
+xtick.color:        6B7684
+ytick.color:        6B7684
+
+lines.linewidth:    2.0
+lines.markersize:   4
+lines.solid_capstyle: round
+
+legend.frameon:     False
+legend.handlelength: 1.6
+
+axes.prop_cycle: cycler('color', ['14508C', '2E7BC4', '5B9BD5', 'A8C8E4', 'D6E6F2', '0E7C86', 'E08A2E'])
