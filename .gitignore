@@ -15,7 +15,6 @@ CLAUDE.md
 .learning-draft-*.md
 .review-final.md
 
-# deck: generated output and photographs (photographs are not redistributed)
+# deck: only the rendered output (figures and photographs are distributed)
 deck/out/
-deck/img/
 deck/__pycache__/

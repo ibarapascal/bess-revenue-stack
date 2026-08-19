@@ -45,7 +45,7 @@ LaTeX.
 | `palette.py` | Colour tokens (blue = fact, red = look here, grey = context) |
 | `make_figures.py` | Seven figures, reading `../results/` only |
 | `render.sh` | HTML → PDF |
-| `img/` | Photographs — **not distributed with the repository** (gitignored) |
+| `img/` | Photographs (2400px) and `credits.json` |
 | `fig/` | Generated figures (reproducible with `make_figures.py`) |
 
 ## Conventions this deck follows
@@ -63,10 +63,21 @@ Format specification: `workspace/skills/report-deck-{workflow,writing,design}.md
 
 ## Photographs
 
-Photographs are gitignored, so a clone reproduces the figures but not the
-PDF as laid out here. The images used are from Wikimedia Commons under
-reusable licences (credited on each page and in `img/credits.json`).
+Both photographs come from Wikimedia Commons under reusable licences and are
+included in `deck/img/`, so a clone reproduces the PDF as laid out here. Each
+is credited on the page it appears on, and in `img/credits.json`.
+
+| Page | Subject | Photographer | Licence |
+|---|---|---|---|
+| Cover | Leslie Battery Storage, Fife — a GB grid-scale battery site | Bill Kasman | CC BY-SA 2.0 (**cropped**) |
+| Back cover | Stockbridge dampers on a 400 kV line | Adrian Pingstone | Public domain |
 
 ## Licence
 
-Deck: CC BY 4.0. Code: MIT, as for the repository.
+**Text and figures**: CC BY 4.0. **Code**: MIT, as for the repository.
+
+**Photographs keep their own licences** — they are collected here, not
+absorbed into the deck's licence. In particular the cover photograph is a
+crop of a CC BY-SA 2.0 work, so that crop is itself available under
+CC BY-SA 2.0; the ShareAlike condition applies to the image, not to the text
+and figures around it.
