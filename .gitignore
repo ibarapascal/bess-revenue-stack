@@ -15,6 +15,9 @@ CLAUDE.md
 .learning-draft-*.md
 .review-final.md
 
-# deck: only the rendered output (figures and photographs are distributed)
-deck/out/
+# deck: the distributed PDF is tracked — it is served from the company site, so the
+# exact published bytes have to be traceable to a commit (re-rendering does not
+# reproduce them byte for byte). Everything else under out/ is proofing output.
+deck/out/*
+!deck/out/*.pdf
 deck/__pycache__/

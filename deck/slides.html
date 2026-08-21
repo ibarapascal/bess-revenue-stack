@@ -7,7 +7,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>BESS revenue stack — what four modelling shortcuts cost</title>
+  <title>BESS revenue stack — what five modelling shortcuts cost</title>
   <link rel="stylesheet" href="deck.css">
   <style>
     .photo-credit-b { position:absolute; right:10pt; bottom:6pt; font-size:7pt; color:#fff; opacity:.8; }
@@ -32,8 +32,8 @@
 <section class="slide">
   <div class="cover-photo"><img src="img/cover.jpg" style="object-position:50% 34%;" alt=""></div>
   <div class="photo-credit">Photo: Leslie Battery Storage, Fife — Bill Kasman / CC BY-SA 2.0</div>
-  <div class="cover-band" style="top:56pt;"><h1>What four modelling shortcuts cost
-a grid battery's revenue forecast</h1></div>
+  <div class="cover-band" style="top:56pt;"><h1>What five modelling shortcuts cost
+a grid battery’s revenue forecast</h1></div>
   <div class="cover-bar">
     <div class="org">Open research&nbsp;&nbsp;bess-revenue-stack</div>
     <div class="date">August 2026</div>
@@ -103,7 +103,7 @@ its own flattering quarter</div>
         <tr><td class="rowhead">Window</td>
             <td>1 March 2024 – 1 January 2026<br><b>672 execution days</b>, one window for every finding</td></tr>
         <tr><td class="rowhead">Degradation</td>
-            <td>Power-law calendar and cycle ageing, anchored to a field plant's measured loss over its own life</td></tr>
+            <td>Power-law calendar and cycle ageing, anchored to a field plant’s measured loss over its own life</td></tr>
       </table>
     </div>
     <div style="flex:1;">
@@ -133,7 +133,7 @@ Forecast error costs more; wear pricing sets the ratio</div>
   <div class="tag">Headline</div>
   <div class="subtitle">From the theoretical ceiling to the achievable number, on the forecast-driven case</div>
   <div class="unit">Unit: £m over 22 months</div>
-  <div class="source">Source: v2_capture_rate, v0_arbitrage</div>
+  <div class="source">Source: Makuhari Development analysis</div>
   <div class="body with-readout"><img src="fig/waterfall.png" alt=""></div>
   <div class="readout">This is a wholesale-only strategy indexed to the half-hourly price, so £1.42m is the achievable revenue of the forecast-dependent leg, not of the asset
 A model ignoring wear entirely would cycle 729 times a year and print £4.17m — the top bar already prices degradation</div>
@@ -147,7 +147,7 @@ A model ignoring wear entirely would cycle 729 times a year and print £4.17m �
 The wear price has four inputs, and one of them is measured</div>
   <div class="subtitle">Sensitivity of the cost of wear to its inputs, and what it does to the headline ratio</div>
   <div class="unit">Unit: left £/MWh throughput, right ratio</div>
-  <div class="source">Source: v0_cdeg_inputs, v2_cdeg_band</div>
+  <div class="source">Source: Makuhari Development analysis</div>
   <div class="body with-readout"><img src="fig/cdeg.png" alt=""></div>
   <div class="readout">Replacement cost, discount rate, assumed life and the end-of-life threshold each move the wear price by more than a third
 Only the ageing model itself is anchored to measurement — to a field plant that lost 4.1% of capacity over 356 equivalent full cycles in three years</div>
@@ -161,7 +161,7 @@ Only the ageing model itself is anchored to measurement — to a field plant tha
 The error is 3–15%, largest where the reserve price is lowest</div>
   <div class="subtitle">Reserve position and the resulting overstatement across the price sweep</div>
   <div class="unit">Unit: left MW, right %</div>
-  <div class="source">Source: v1_reserve_headroom (reserve prices are a synthetic sweep, not market data)</div>
+  <div class="source">Source: Makuhari Development analysis (reserve prices are a synthetic sweep, not market data)</div>
   <div class="body with-readout"><img src="fig/headroom.png" alt=""></div>
   <div class="readout">At a high reserve price the battery holds energy back anyway, because reserve outbids arbitrage — so the constraint stops binding
 The shortcut is therefore most dangerous in exactly the case a developer treats as conservative: a modest reserve price alongside an active arbitrage strategy</div>
@@ -176,14 +176,14 @@ The error lands on cycles you already paid wear for</div>
   <div class="tag">Look here</div>
   <div class="subtitle">Capture rate against perfect foresight, gross and net of the cost of wear</div>
   <div class="unit">Unit: % of perfect foresight</div>
-  <div class="source">Source: v2_capture_rate</div>
+  <div class="source">Source: Makuhari Development analysis</div>
   <div class="body">
     <div style="flex:1; display:flex; align-items:center;"><img src="fig/capture.png" alt=""></div>
     <ul class="bullets" style="width:238pt;">
       <li>Gradient boosting on lagged prices beats persistence on both measures, but the <b>gross-to-net gap widens</b>: 1.24× at the field-anchored wear price, 1.54× at the German one</li>
       <li>The mechanism is not subtle. A mistimed cycle still consumes capacity, so the wear cost is paid whether or not the spread materialises</li>
       <li>This is a claim about <b>degradation-aware models</b>, not about forecasting: at zero wear price the two capture rates coincide</li>
-      <li>Both predictors are deliberately naive — no weather, no outages, no fuel. A desk's forecast should beat them, which makes 48% a floor</li>
+      <li>Both predictors are deliberately naive — no weather, no outages, no fuel. A desk’s forecast should beat them, which makes 48% a floor</li>
     </ul>
   </div>
   <div class="footer-chapter"><span class="num">2</span>The five shortcuts</div>
@@ -196,7 +196,7 @@ The error lands on cycles you already paid wear for</div>
 With no thermal load it reads 2.9% LOW, not high</div>
   <div class="subtitle">Overstatement against thermal load, and the level / shape split of the efficiency term</div>
   <div class="unit">Unit: left %, right £k</div>
-  <div class="source">Source: v3_converter_efficiency, v6_duration</div>
+  <div class="source">Source: Makuhari Development analysis</div>
   <div class="body with-readout"><img src="fig/efficiency.png" alt=""></div>
   <div class="readout">The efficiency half is a <b>level</b> error, not a shape one: equalising the average leaves load dependence worth 0.7–1.6% of the term, at 1, 2 and 4 hours alike
 So the modelling effort belongs on where the auxiliaries are charged, not on resolving the converter curve — the opposite of where it usually goes</div>
@@ -210,7 +210,7 @@ So the modelling effort belongs on where the auxiliaries are charged, not on res
 Peak-shifting ages a cell 1.8–1.9× faster than reserve duty</div>
   <div class="subtitle">Effect of differentiating the wear price by service, at a £2/MW/h reserve price</div>
   <div class="unit">Unit: left MW, right % against a single flat price</div>
-  <div class="source">Source: v4_service_cdeg; ageing ratio from module tests on 220 Ah LFP under grid duty profiles</div>
+  <div class="source">Source: Makuhari Development analysis; ageing ratio from module tests on 220 Ah LFP under grid duty profiles</div>
   <div class="body">
     <div style="flex:1; display:flex; align-items:center;"><img src="fig/service.png" alt=""></div>
     <ul class="bullets" style="width:238pt;">
@@ -230,7 +230,7 @@ Peak-shifting ages a cell 1.8–1.9× faster than reserve duty</div>
 The degradation interval is the widest, and nowhere near zero</div>
   <div class="subtitle">Point estimates with 95% intervals, resampling execution days in 7-day blocks (2,000 replicates)</div>
   <div class="unit">Unit: %</div>
-  <div class="source">Source: v7_bootstrap</div>
+  <div class="source">Source: Makuhari Development analysis</div>
   <div class="body with-readout"><img src="fig/bootstrap.png" alt=""></div>
   <div class="readout">Dispatch is solved once and the per-day results are resampled, so this measures sampling variation in the window — not uncertainty in the degradation model itself
 Quarter-to-quarter variation is wider than the bootstrap interval in every case, which is the honest bound on transporting these numbers to another period</div>
@@ -249,11 +249,11 @@ Quarter-to-quarter variation is wider than the bootstrap interval in every case,
       <tr>
         <td class="rowhead">Ageing as a power law,<br>charged at the margin</td>
         <td>Both ageing terms are power laws in their driver, with exponents below one, and only the cycle term enters the cost per MWh — calendar fade is a cost of ownership, not of trading</td>
-        <td>Read as linear rates, the same model predicts <b>67%</b> capacity loss over the field plant's first three years against <b>4.1%</b> measured. With the exponents applied, the field anchor is a 0.82 correction rather than a rescue</td>
+        <td>Read as linear rates, the same model predicts <b>67%</b> capacity loss over the field plant’s first three years against <b>4.1%</b> measured. With the exponents applied, the field anchor is a 0.82 correction rather than a rescue</td>
       </tr>
       <tr>
         <td class="rowhead">Auxiliaries separated<br>from the efficiency curve</td>
-        <td>The converter's load-independent loss is charged only when it runs; thermal management is modelled as power × time and swept over 0–0.2 MW</td>
+        <td>The converter’s load-independent loss is charged only when it runs; thermal management is modelled as power × time and swept over 0–0.2 MW</td>
         <td>Stops the same energy being charged twice, which is what makes the sign of finding 4 readable at all</td>
       </tr>
       <tr>
@@ -301,7 +301,7 @@ Quarter-to-quarter variation is wider than the bootstrap interval in every case,
       </tr>
       <tr>
         <td class="rowhead">Model the auxiliary load —<br>not the converter curve</td>
-        <td>The curve's shape term is worth about 1% of the efficiency term; the standing draw is the rest</td>
+        <td>The curve’s shape term is worth about 1% of the efficiency term; the standing draw is the rest</td>
         <td><b>up to 5.7%</b>, sign depends on the auxiliaries</td>
         <td>One binary per period</td>
       </tr>

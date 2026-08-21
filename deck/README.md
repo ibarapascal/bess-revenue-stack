@@ -8,7 +8,7 @@ computed here: every number is read from `../results/`.
 
 | File | Contents |
 |---|---|
-| `out/bess-revenue-stack-en.pdf` | 14 pages, 780×540 pt, English |
+| `out/20260729-bess-revenue-stack-en.pdf` | 14 pages, 780×540 pt, English |
 
 ## Structure
 
@@ -28,7 +28,7 @@ Back cover
 
 ```bash
 python deck/make_figures.py                              # results/* -> deck/fig/*.png
-cd deck && ./render.sh slides.html out/bess-revenue-stack-en.pdf
+cd deck && ./render.sh slides.html out/20260729-bess-revenue-stack-en.pdf
 ```
 
 Dependencies: `pandas`, `matplotlib`, `pillow` (already in the repository's
